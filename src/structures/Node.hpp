@@ -14,16 +14,19 @@ class Way;
 
 class Node
 {
-	public:
-		Node(): id(0), lat(0), lon(0)
-		{
-		}
+public:
+	Node(): id(0), lat(0), lon(0), bus_stop(false), tram_stop(false)
+	{
+	}
 
-		long id;
-		double lat;
-		double lon;
-		set<Edge*> neighbors;
-		map<long, Way*> ways;
+	long id;
+	double lat;
+	double lon;
+	bool bus_stop;
+	bool tram_stop;
+	string name;
+	set<Edge*> neighbors;
+	map<long, Way*> ways;
 };
 
 #endif

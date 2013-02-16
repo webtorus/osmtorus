@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+#include <map>
 
 #include "OsmParser.hpp"
 
@@ -8,7 +9,7 @@ using namespace std;
 
 OsmParser::OsmParser()
 {
-	current = BAD_CAST "";
+	current_element = EMPTY;
 	
 	// Initialiser tous les pointeurs de callback à NULL
 	memset(&sax_handler, 0, sizeof(xmlSAXHandler));
@@ -22,37 +23,38 @@ OsmParser::OsmParser()
 
 OsmParser::~OsmParser()
 {
-}
-
-void OsmParser::onStartDocument(void* parser)
-{
-}
-
-void OsmParser::onEndDocument(void* parser)
-{
-	OsmParser* self = static_cast<OsmParser*>(parser);
-
-	self->deleteUseless();
-}
-
-void OsmParser::deleteUseless()
-{
-	cout << "Nombre de voies : " << ways.size() << endl;
-
-	cout << "Avant suppression des noeuds inutiles : " << nodes.size() << endl;
-	// Supprime tous les noeuds qui ne sont pas dans une voie
-	map<long, Node*>::iterator it_n = nodes.begin();
-
-	while (it_n != nodes.end()) {
-		if (NULL == it_n->second || it_n->second->ways.empty()) {
-			delete it_n->second;
-			nodes.erase(it_n++);
-		} else {
-			it_n++;
-		}
+	map<long, ParsedNode*>::iterator it_n;
+	for (it_n = nodes.begin(); it_n != nodes.end(); it_n++) {
+		ParsedNode* node = it_n->second;
+		delete node;
 	}
 
-	cout << "Après suppression des noeuds inutiles : " << nodes.size() << endl;
+	map<long, ParsedWay*>::iterator it_w;
+	for (it_w = ways.begin(); it_w != ways.end(); it_w++) {
+		ParsedWay* way = it_w->second;
+		delete way;
+	}
+
+	map<long, ParsedRelation*>::iterator it_r;
+	for (it_r = relations.begin(); it_r != relations.end(); it_r++) {
+		ParsedRelation* relation = it_r->second;
+		delete relation;
+	}
+}
+
+map<long, ParsedNode*>& OsmParser::getNodes()
+{
+	return nodes;
+}
+
+map<long, ParsedWay*>& OsmParser::getWays()
+{
+	return ways;
+}
+
+map<long, ParsedRelation*>& OsmParser::getRelations()
+{
+	return relations;
 }
 
 void OsmParser::parseFile(string file_path)
@@ -60,14 +62,29 @@ void OsmParser::parseFile(string file_path)
 	xmlSAXUserParseFile(&sax_handler, this, file_path.c_str());
 }
 
-map<long, Node*>& OsmParser::getNodes()
+void OsmParser::onStartDocument(void* parser)
 {
-	return nodes;
+	OsmParser* self = static_cast<OsmParser*>(parser);
+	self->initialize();
 }
 
-map<long, Way*>& OsmParser::getWays()
+void OsmParser::onEndDocument(void* parser)
 {
-	return ways;
+	OsmParser* self = static_cast<OsmParser*>(parser);
+	self->finish();
+}
+
+void OsmParser::initialize()
+{
+	boxes.min_x = 180;
+	boxes.min_y = 180;
+	boxes.max_x = -180;
+	boxes.max_y = -180;
+}
+
+void OsmParser::finish()
+{
+
 }
 
 void OsmParser::onStartElement(void* parser, const xmlChar* name, const xmlChar** attrs)
@@ -76,18 +93,16 @@ void OsmParser::onStartElement(void* parser, const xmlChar* name, const xmlChar*
 
 	if (xmlStrEqual(name, BAD_CAST "node")) {
 		self->parseNode(attrs);
-		self->current = name;
 	} else if (xmlStrEqual(name, BAD_CAST "way")) {
 		self->parseWay(attrs);
-		self->current = name;
+	} else if (xmlStrEqual(name, BAD_CAST "relation")) {
+		self->parseRelation(attrs);
 	} else if (xmlStrEqual(name, BAD_CAST "nd")) {
 		self->parseNodeWay(attrs);
+	} else if (xmlStrEqual(name, BAD_CAST "member")) {
+		self->parseMemberRelation(attrs);
 	} else if (xmlStrEqual(name, BAD_CAST "tag")) {
-		if  (xmlStrEqual(self->current, BAD_CAST "node")) {
-			self->parseTagNode(attrs);
-		} else if (xmlStrEqual(self->current, BAD_CAST "way")) {
-			self->parseTagWay(attrs);
-		}
+		self->parseTag(attrs);
 	}
 }
 
@@ -97,132 +112,32 @@ void OsmParser::onEndElement(void* parser, const xmlChar* name)
 
 	if (xmlStrEqual(name, BAD_CAST "way")) {
 		self->validCurrentWay();
-		self->current = BAD_CAST "";
 	} else if (xmlStrEqual(name, BAD_CAST "node")) {
-		self->current = BAD_CAST "";
+		self->validCurrentNode();
+	} else if (xmlStrEqual(name, BAD_CAST "relation")) {
+		self->validCurrentRelation();
 	}
 }
 
-void OsmParser::parseTagNode(const xmlChar** attrs)
+void OsmParser::parseTag(const xmlChar** attrs)
 {
-
-}
-
-int OsmParser::highwayType(const xmlChar* type)
-{
-	if (xmlStrEqual(type, BAD_CAST "path")) {
-		return FootWay|CycleWay;
-	} else if (xmlStrEqual(type, BAD_CAST "pedestrian")) {
-		return FootWay;
-	} else if (xmlStrEqual(type, BAD_CAST "footway")) {
-		return FootWay;
-	} else if (xmlStrEqual(type, BAD_CAST "cycleway")) {
-		return CycleWay;
-	} else if (xmlStrEqual(type, BAD_CAST "living_street")) {
-		return FootWay|CycleWay|CarWay;
-	} else if (xmlStrEqual(type, BAD_CAST "residential")) {
-		return FootWay|CycleWay|CarWay;
-	} else if (xmlStrEqual(type, BAD_CAST "road")) {
-		return FootWay|CycleWay|CarWay;
-	} else if (xmlStrEqual(type, BAD_CAST "steps")) {
-		return FootWay;
-	} else if (xmlStrEqual(type, BAD_CAST "motorway")) {
-		return CarWay;
+	if (NODE == current_element) {
+		parseTagNode(attrs);
+	} else if (WAY == current_element) {
+		parseTagWay(attrs);
+	} else if (RELATION == current_element) {
+		parseTagRelation(attrs);
 	}
-
-
-	return CarWay|CycleWay;
-}
-
-void OsmParser::parseTagWay(const xmlChar** attrs)
-{
-	const int k = 1;
-	const int v = 3;
-
-	if (xmlStrEqual(attrs[k], BAD_CAST "name")) {
-		string name((char*) attrs[v]);
-		current_way->name = name;
-	} else if (xmlStrEqual(attrs[k], BAD_CAST "highway")) {
-		current_way->type = highwayType(attrs[v]);
-	} else if (xmlStrEqual(attrs[k], BAD_CAST "foot")) {
-		current_way->type |= FootWay;
-	} else if (xmlStrEqual(attrs[k], BAD_CAST "bicycle")) {
-		current_way->type |= CycleWay;
-	} else if (xmlStrEqual(attrs[k], BAD_CAST "railway")) {
-		if (xmlStrEqual(attrs[v], BAD_CAST "tram")) {
-			current_way->type |= TramWay;
-		}
-	}
-}
-
-void OsmParser::validCurrentWay()
-{
-	if (0 != current_way->type) {
-		vector<Node*>::iterator it;
-
-		for (it = current_way_nodes.begin(); it + 1 != current_way_nodes.end(); ++it) {
-			Node* node = *it;
-			node->ways[current_way->id] = current_way;
-
-			Node* next_node = *(it + 1);
-			next_node->ways[current_way->id] = current_way;
-
-			long distance = Edge::distanceBetween(node, next_node);
-			Edge* e = new Edge();
-			e->to = next_node;
-			e->way = current_way;
-			e->distance = distance;
-			node->neighbors.insert(e);
-
-			e = new Edge();
-			e->to = node;
-			e->way = current_way;
-			e->distance = distance;
-			next_node->neighbors.insert(e);
-		}	
-	} else {
-		ways.erase(current_way->id);
-		delete current_way;
-	}
-
-	current_way = NULL;
-}
-
-void OsmParser::parseNodeWay(const xmlChar** attrs)
-{
-	int ref = atoi((char*) attrs[1]);
-
-	Node* node = nodes[ref];
-
-	// La node n'a pas été référencée : La voie a une partie en dehors de la zone
-	if (NULL == node) {
-		return;
-	}
-
-	current_way_nodes.push_back(node);
-}
-
-void OsmParser::parseWay(const xmlChar** attrs)
-{
-	Way* way = new Way();
-	for (int i = 0; attrs[i] != NULL; i += 2) {
-		if (xmlStrEqual(attrs[i], BAD_CAST "id")) {
-			way->id = atoi((char*) attrs[i + 1]);
-		}
-	}
-
-	current_way = way;
-	ways[way->id] = way;
-	current_way_nodes.clear();
 }
 
 void OsmParser::parseNode(const xmlChar** attrs)
 {
-	Node* node = new Node();
+	current_element = NODE;
+	ParsedNode* node = new ParsedNode();
 
 	for (int i = 0; attrs[i] != NULL; i += 2) {
 		if (xmlStrEqual(attrs[i], BAD_CAST "id")) {
-			node->id = atoi((char*) attrs[i + 1]);
+			node->id = atol((char*) attrs[i + 1]);
 		} else if (xmlStrEqual(attrs[i], BAD_CAST "lat")) {
 			node->lat = atof((char*) attrs[i + 1]);
 		} else if (xmlStrEqual(attrs[i], BAD_CAST "lon")) {
@@ -230,6 +145,92 @@ void OsmParser::parseNode(const xmlChar** attrs)
 		}
 	}
 
-	nodes[node->id] = node;
+	if (node->lat < boxes.min_x) {
+		boxes.min_x = node->lat;
+	}
+	if (node->lat > boxes.max_x) {
+		boxes.max_x = node->lat;
+	}
+	if (node->lon < boxes.min_y) {
+		boxes.min_y = node->lon;
+	}
+	if (node->lon > boxes.max_y) {
+		boxes.max_y = node->lon;
+	}
+
+	current_node = node;
 }
 
+void OsmParser::parseTagNode(const xmlChar** attrs)
+{
+
+}
+
+void OsmParser::validCurrentNode()
+{
+	current_element = EMPTY;
+
+	current_node = NULL;
+}
+
+void OsmParser::parseWay(const xmlChar** attrs)
+{
+	current_element = WAY;
+	ParsedWay* way = new ParsedWay();
+	for (int i = 0; attrs[i] != NULL; i += 2) {
+		if (xmlStrEqual(attrs[i], BAD_CAST "id")) {
+			way->id = atol((char*) attrs[i + 1]);
+		}
+	}
+
+	current_way = way;
+}
+
+void OsmParser::parseNodeWay(const xmlChar** attrs)
+{
+
+}
+
+
+void OsmParser::parseTagWay(const xmlChar** attrs)
+{
+
+}
+
+void OsmParser::validCurrentWay()
+{
+	current_element = EMPTY;
+	
+	current_way = NULL;
+}
+
+void OsmParser::parseRelation(const xmlChar** attrs)
+{
+	current_element = RELATION;
+	ParsedRelation* relation = new ParsedRelation();
+	
+	for (int i = 0; attrs[i] != NULL; i += 2) {
+		if (xmlStrEqual(attrs[i], BAD_CAST "id")) {
+			relation->id = atol((char*) attrs[i + 1]);
+		}
+	}
+
+	current_relation = relation;
+}
+
+void OsmParser::parseMemberRelation(const xmlChar** attrs)
+{
+
+}
+
+void OsmParser::parseTagRelation(const xmlChar** attrs)
+{
+
+}
+
+void OsmParser::validCurrentRelation()
+{
+	current_element = EMPTY;
+
+	current_relation = NULL;
+}

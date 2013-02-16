@@ -4,9 +4,22 @@
 #include <libxml/parser.h>
 #include <map>
 
-#include "../structures/Node.hpp"
-#include "../structures/Way.hpp"
-#include "../structures/Edge.hpp"
+#include "ParsedNode.hpp"
+#include "ParsedWay.hpp"
+#include "ParsedRelation.hpp"
+
+#include "../structures/BoundingBoxes.hpp"
+
+#define K 1
+#define V 3
+
+enum CurrentElementType
+{
+	EMPTY,
+	NODE,
+	WAY,
+	RELATION
+};
 
 class OsmParser
 {
@@ -14,10 +27,9 @@ public:
 	OsmParser();
 	virtual ~OsmParser();
 	virtual void parseFile(std::string file_path);
-	virtual map<long, Node*>& getNodes();
-	virtual map<long, Way*>& getWays();
-
-	static int highwayType(const xmlChar* type);
+	virtual map<long, ParsedNode*>& getNodes();
+	virtual map<long, ParsedWay*>& getWays();
+	virtual map<long, ParsedRelation*>& getRelations();
 
 protected:
 	static void onStartDocument(void* parser);
@@ -25,25 +37,36 @@ protected:
 	static void onStartElement(void* parser, const xmlChar* name, const xmlChar** attrs);
 	static void onEndElement(void* parser, const xmlChar* name);
 
-private:
-	void parseNode(const xmlChar** attrs);
-	void parseWay(const xmlChar** attrs);
-	void parseNodeWay(const xmlChar** attrs);
-	void parseTagNode(const xmlChar** attrs);
-	void parseTagWay(const xmlChar** attrs);
-	void validCurrentWay();
-	void deleteUseless();
+protected:
+	virtual void initialize();
+	virtual void parseTag(const xmlChar** attrs);
+	virtual void parseNode(const xmlChar** attrs);
+	virtual void parseTagNode(const xmlChar** attrs);
+	virtual void validCurrentNode();
+	virtual void parseWay(const xmlChar** attrs);
+	virtual void parseNodeWay(const xmlChar** attrs);
+	virtual void validCurrentWay();
+	virtual void parseTagWay(const xmlChar** attrs);
+	virtual void parseRelation(const xmlChar** attrs);
+	virtual void parseMemberRelation(const xmlChar** attrs);
+	virtual void parseTagRelation(const xmlChar** attrs);
+	virtual void validCurrentRelation();
+	virtual void finish();
 
 	xmlSAXHandler sax_handler;
 
-	const xmlChar* current;
-	Way* current_way;
-	vector<Node*> current_way_nodes;
-	Node* current_node;
+	CurrentElementType current_element;
 
+	ParsedWay* current_way;
+	ParsedNode* current_node;
+	ParsedRelation* current_relation;
 
-	map<long, Node*> nodes;
-	map<long, Way*> ways;
+	BoundingBoxes<ParsedNode*, 50, 50> boxes;
+	
+	map<long, ParsedRelation*> relations;
+	map<long, ParsedNode*> nodes;
+	map<long, ParsedWay*> ways;
+
 };
 
 

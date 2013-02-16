@@ -5,9 +5,7 @@
 #include <map>
 #include <iostream>
 
-#include "../structures/Edge.hpp"
-#include "../structures/Way.hpp"
-#include "../structures/Node.hpp"
+#include "../structures/RoutingGraph.hpp"
 
 using namespace std;
 
@@ -17,14 +15,12 @@ class Way;
 class RoutingStorage
 {
 	public:
-		RoutingStorage();
-		RoutingStorage(map<long, Node*>& nodes, map<long, Way*>& ways);
+		RoutingStorage(RoutingGraph& graph);
 
-		virtual void write(ostream& output_nodes, ostream& output_ways, ostream& output_edges);
-		virtual void read(istream& input_nodes, istream& input_ways, istream& input_edges);
+		virtual void write(ostream& output_nodes, ostream& output_lines, ostream& output_ways, ostream& output_edges);
+		virtual void read(istream& input_nodes, istream& input_lines, istream& input_ways, istream& input_edges);
 
-		virtual map<long, Node*> getNodes() const;
-		virtual map<long, Way*> getWays() const;
+		virtual RoutingGraph& getGraph();
 
 		template<class T>
 		static istream& read(istream& is, T& value);
@@ -36,13 +32,14 @@ class RoutingStorage
 		void writeNodes(ostream& output);
 		void writeWays(ostream& output);
 		void writeEdges(ostream& output);
+		void writeLines(ostream& output);
 
 		void readNodes(istream& input);
 		void readWays(istream& input);
 		void readEdges(istream& input);
+		void readLines(istream& input);
 
-		map<long, Node*> nodes;
-		map<long, Way*> ways;
+		RoutingGraph& graph;
 };
 
 #endif

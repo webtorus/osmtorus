@@ -13,16 +13,14 @@ class Way;
 class Edge
 {
 	public:
-		Edge();
+		Edge(): length(0), to(NULL), way(NULL)
+		{
+		}
 
-		static unsigned int distanceBetween(Node* n1, Node* n2);
-
-		unsigned int distance;
-
+		unsigned int length;
+		Node* from;
 		Node* to;
 		Way* way;
 };
-
-bool operator<(const Edge& e1, const Edge& e2);
 
 #endif
