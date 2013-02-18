@@ -20,7 +20,7 @@ class RoutingOsmParser: public virtual OsmParser
 		virtual void createRoutingGraph(RoutingGraph& graph);
 
 	protected:
-		//virtual void parseTag(const xmlChar** attrs);
+		virtual void parseTag(const xmlChar** attrs);
 		virtual void parseNode(const xmlChar** attrs);
 		virtual void parseTagNode(const xmlChar** attrs);
 		virtual void validCurrentNode();

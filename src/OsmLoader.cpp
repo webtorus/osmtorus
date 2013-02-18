@@ -34,6 +34,7 @@ bool OsmLoader::_saveTorus(string osm_filename)
 	try {
 		parser.parseFile(osm_filename);
 	} catch (const exception& ex) {
+		cerr << "exception: " << ex.what() << endl;
 	    return false;
 	}
 

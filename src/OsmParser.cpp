@@ -101,11 +101,11 @@ void OsmParser::onStartElement(void* parser, const xmlChar* name, const xmlChar*
 	} else if (xmlStrEqual(name, BAD_CAST "relation")) {
 		self->parseRelation(attrs);
 	} else if (xmlStrEqual(name, BAD_CAST "nd")) {
-		//self->parseNodeWay(attrs);
+		self->parseNodeWay(attrs);
 	} else if (xmlStrEqual(name, BAD_CAST "member")) {
-		//self->parseMemberRelation(attrs);
+		self->parseMemberRelation(attrs);
 	} else if (xmlStrEqual(name, BAD_CAST "tag")) {
-		//self->parseTag(attrs);
+		self->parseTag(attrs);
 	}
 }
 
@@ -121,18 +121,18 @@ void OsmParser::onEndElement(void* parser, const xmlChar* name)
 		self->validCurrentRelation();
 	}
 }
-/*
+
 void OsmParser::parseTag(const xmlChar** attrs)
 {
 	if (NODE == current_element) {
-		//parseTagNode(attrs);
+		parseTagNode(attrs);
 	} else if (WAY == current_element) {
-		//parseTagWay(attrs);
+		parseTagWay(attrs);
 	} else if (RELATION == current_element) {
-		//parseTagRelation(attrs);
+		parseTagRelation(attrs);
 	}
 }
-*/
+
 void OsmParser::parseNode(const xmlChar** attrs)
 {
 	current_element = NODE;
@@ -163,12 +163,12 @@ void OsmParser::parseNode(const xmlChar** attrs)
 
 	current_node = node;
 }
-/*
+
 void OsmParser::parseTagNode(const xmlChar** attrs)
 {
 
 }
-*/
+
 void OsmParser::validCurrentNode()
 {
 	current_element = EMPTY;
@@ -188,18 +188,18 @@ void OsmParser::parseWay(const xmlChar** attrs)
 
 	current_way = way;
 }
-/*
+
 void OsmParser::parseNodeWay(const xmlChar** attrs)
 {
 
 }
-*/
-/*
+
+
 void OsmParser::parseTagWay(const xmlChar** attrs)
 {
 
 }
-*/
+
 void OsmParser::validCurrentWay()
 {
 	current_element = EMPTY;
@@ -220,18 +220,17 @@ void OsmParser::parseRelation(const xmlChar** attrs)
 
 	current_relation = relation;
 }
-/*
+
 void OsmParser::parseMemberRelation(const xmlChar** attrs)
 {
 
 }
-*/
-/*
+
 void OsmParser::parseTagRelation(const xmlChar** attrs)
 {
 
 }
-*/
+
 void OsmParser::validCurrentRelation()
 {
 	current_element = EMPTY;
