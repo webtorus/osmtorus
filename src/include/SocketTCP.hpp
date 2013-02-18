@@ -21,6 +21,7 @@ class SocketTCP
 		int sending(int message);
 		int sending(float message);
 		int sending(double message);
+		int sending(std::string message);
 
 		int receive(void* message, unsigned int size = 1);
 		int receive(char* message);

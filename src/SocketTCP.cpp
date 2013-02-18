@@ -175,6 +175,11 @@ int SocketTCP::sending(double message)
 	return this->sending((void*)&message, sizeof(double));
 }
 
+int SocketTCP::sending(std::string message)
+{
+	return this->sending((void*)message.c_str(), message.size() + 1);
+}
+
 int SocketTCP::receive(void* message, unsigned int size)
 {
 	int recv_return = -1;

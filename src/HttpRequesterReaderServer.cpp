@@ -61,20 +61,16 @@ bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 	map<string, string> request_params;
 
 	string params_string = request.substr(request_type.size())  + '&';
-	cout << "params_string " << params_string << endl; 
 	unsigned pos_and = params_string.find_first_of('&');
 	while (pos_and < params_string.size()) {
 		string param_string = params_string.substr(0, pos_and);
 
 		unsigned pos_equal = param_string.find_first_of('=');
 		string key = param_string.substr(0, pos_equal);
-		cout << "key " << key << endl;
 		string value = params_string.substr(pos_equal + 1, pos_and - pos_equal - 1);
-		cout << "value " << value << endl;
 		request_params[key] = value;
 
 		params_string = params_string.substr(pos_and + 1);
-		cout << "params_string " << params_string << endl; 
 		pos_and = params_string.find_first_of('&');
 	}
 
