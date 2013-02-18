@@ -1,4 +1,6 @@
 #include "include/ConfLoader.hpp"
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -34,8 +36,9 @@ bool ConfLoader::run(bool is_daemon)
 					short int port = -1;
 
 					line_split >> port;
-
+std::cout << "port " << port << std::endl;
 					if(!line_split.fail()) {
+std::cout << "port insert " << port << std::endl;
 						_ports.insert(port);
 					} else {
 						return false;
@@ -45,11 +48,18 @@ bool ConfLoader::run(bool is_daemon)
 
 					line_split >> authorized;
 
+					struct sockaddr_in addr;
+					addr.sin_family = AF_INET;
+					addr.sin_addr.s_addr = ((struct in_addr*)(gethostbyname(authorized.c_str())->h_addr))->s_addr;
+					authorized = inet_ntoa(addr.sin_addr);
+
+std::cout << "authorized " << authorized << std::endl;
 					if(!line_split.fail()) {
 						if(authorized == "*" || _all_authorized) {
 							_authorizeds.clear();
 							_all_authorized = true;
 						} else {
+std::cout << "authorized insert " << authorized << std::endl;
 							_authorizeds.insert(authorized);
 						}
 					} else {
