@@ -45,15 +45,18 @@ void Server::run(int argc, char* argv[])
 		} else {
 			conf_loader_return = _conf_loader.run(true);
 		}
-
+//TEST
+std::cout << "conf_loader_return: " << conf_loader_return << std::endl;
 		if(conf_loader_return) {
 			std::set<short int> ports = _conf_loader.getPorts();
-
+//TEST
+std::cout << "_conf_loader.getOsmFile(): " << _conf_loader.getOsmFile() << std::endl;
 			if(_conf_loader.getOsmFile() != "") {
 				bool osm_loader_return = false;
 
 				osm_loader_return = _osm_loader.run(_conf_loader.getOsmFile());
-
+//TEST
+std::cout << "osm_loader_return: " << osm_loader_return << std::endl;
 				if(osm_loader_return) {
 					for(short int port: ports) {
 						Thread listener_thread;
@@ -95,14 +98,16 @@ void* Server::listener(void* arg)
 		listener_socket.accepting(requester_socket);
 
 		client_ip = requester_socket.getClientIp();
-
+//TEST
+std::cout << "client_ip: " << client_ip << std::endl;
 		for(std::string next_ip: _conf_loader.getAuthorizeds()) {
 			if(next_ip == client_ip) {
 				client_ip_authorized = true;
 				break;
 			}
 		}
-
+//TEST
+std::cout << "client_ip_authorized || _conf_loader.allAuthorized(): " << (client_ip_authorized || _conf_loader.allAuthorized()) << std::endl;
 		if(client_ip_authorized || _conf_loader.allAuthorized()) {
 			requester_thread.create(Server::requester, (void*)&requester_socket);
 		}
@@ -129,9 +134,9 @@ void* Server::requester(void* arg)
 	requester_socket = *((SocketTCP*)arg);
 	requester_cond.signal();
 	requester_mutex.unlock();
+//TEST
+std::cout << "FIN TEST" << std::endl;
 	if(http_requester_reader_server.run(requester_socket)) {
-		
-
 		http_requester_writer_server.run();//probable parametre
 	} else {
 		http_requester_writer_server.run();//probable parametre
