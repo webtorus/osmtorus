@@ -61,26 +61,41 @@ bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 	map<string, string> request_params;
 
 	string params_string = request.substr(request_type.size())  + '&';
+	cout << "params_string " << params_string << endl; 
 	unsigned pos_and = params_string.find_first_of('&');
 	while (pos_and < params_string.size()) {
 		string param_string = params_string.substr(0, pos_and);
 
 		unsigned pos_equal = param_string.find_first_of('=');
 		string key = param_string.substr(0, pos_equal);
-		string value = params_string.substr(pos_equal + 1);
+		cout << "key " << key << endl;
+		string value = params_string.substr(pos_equal + 1, pos_and - pos_equal - 1);
+		cout << "value " << value << endl;
 		request_params[key] = value;
 
 		params_string = params_string.substr(pos_and + 1);
+		cout << "params_string " << params_string << endl; 
+		pos_and = params_string.find_first_of('&');
+	}
+
+	if (request_params["source"].empty() || request_params["target"].empty() || request_params["type"].empty()) {
+		return false;
 	}
 
 	vector<string> tokens;
 	// Source
 	tokens = split(request_params["source"], ',');
+	if (tokens.size() != 2) {
+		return false;
+	}
 	_lat_source = atof(tokens[0].c_str());
 	_lon_source = atof(tokens[1].c_str());
 
 	// Target
 	tokens = split(request_params["target"], ',');
+	if (tokens.size() != 2) {
+		return false;
+	}
 	_lat_target = atof(tokens[0].c_str());
 	_lon_target = atof(tokens[1].c_str());
 
