@@ -53,6 +53,11 @@ bool OsmLoader::_saveTorus(string osm_filename)
 	RoutingStorage storage(_graph);
 	storage.write(nodes_file, lines_file, ways_file, edges_file);
 
+	nodes_file.close();
+	lines_file.close();
+	ways_file.close();
+	edges_file.close();
+
 	return true;
 }
 
@@ -75,6 +80,11 @@ bool OsmLoader::_loadTorus(string osm_filename)
 
 	RoutingStorage storage(_graph);
 	storage.read(nodes_file, lines_file, ways_file, edges_file);
+
+	nodes_file.close();
+	lines_file.close();
+	ways_file.close();
+	edges_file.close();
 
 	return true;
 }
