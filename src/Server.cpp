@@ -11,30 +11,6 @@
 #include <sstream>
 #include <string>
 
-/*
- * to do
- *
- * parser fichier conf en entier
- * integrer le parser osm dans loadosm
- * boundingbox sur les noeuds
- * valider requete route
- * algo trouver le noeud le plus proche d'une coordonnee
- *  trouver la boundingbox correspondant a la coordonnee
- *  selectionner tous les boundingbox susceptibles de contenir le noeud recherche
- *  selectionner tous les noeuds des boundingsbox sélectionnees
- *  comparaison distance entre les noeuds(naif, amelioration: possibilite de supprimer des noeuds sans calcul de la distance => plus rapide)
- *  faire l'algo pour les coordonnees de depart et d'arrivee
- * algo a star
- *  selectionner noeud de depart
- *  mettre les noeuds voisins du noeud depart dans une liste (1)
- *  calcul pour chaque noeud le temps = temps_parent + distance(noeud, noeud_parent) / vitesse_typeroute
- *  calcul pour chaque noeud le temps hypothetique pour arrive au noeud arrive = temps + distance(noeud, noeud_arrive) / vitesse_typeroute
- *  selectionner noeud avec le plus faible temps hypothetique
- *  si ce noeud etait deja dans la liste avant cette boucle et que temps_noeud_actuel < temps_noeud_ancien alors remplacer noeud et supprimer la liaison noeud_ancien parent_ancien
- *  refaire l'algo a partir de (1)
- * en dessous de la seconde pour traitement du requete route
- **/
-
 void Server::run(int argc, char* argv[])
 {
 	if(argc == 0 || (argc == 1 && std::string(argv[0]) == "-d")) {
@@ -45,18 +21,15 @@ void Server::run(int argc, char* argv[])
 		} else {
 			conf_loader_return = _conf_loader.run(true);
 		}
-//TEST
-std::cout << "conf_loader_return: " << conf_loader_return << std::endl;
+
 		if(conf_loader_return) {
 			std::set<short int> ports = _conf_loader.getPorts();
-//TEST
-std::cout << "_conf_loader.getOsmFile(): " << _conf_loader.getOsmFile() << std::endl;
+
 			if(_conf_loader.getOsmFile() != "") {
 				bool osm_loader_return = false;
 
 				osm_loader_return = _osm_loader.run(_conf_loader.getOsmFile());
-//TEST
-std::cout << "osm_loader_return: " << osm_loader_return << std::endl;
+
 				if(osm_loader_return) {
 					for(short int port: ports) {
 						Thread listener_thread;
@@ -98,16 +71,14 @@ void* Server::listener(void* arg)
 		listener_socket.accepting(requester_socket);
 
 		client_ip = requester_socket.getClientIp();
-//TEST
-std::cout << "client_ip: " << client_ip << std::endl;
+
 		for(std::string next_ip: _conf_loader.getAuthorizeds()) {
 			if(next_ip == client_ip) {
 				client_ip_authorized = true;
 				break;
 			}
 		}
-//TEST
-std::cout << "client_ip_authorized || _conf_loader.allAuthorized(): " << (client_ip_authorized || _conf_loader.allAuthorized()) << std::endl;
+
 		if(client_ip_authorized || _conf_loader.allAuthorized()) {
 			requester_thread.create(Server::requester, (void*)&requester_socket);
 		}
@@ -134,8 +105,7 @@ void* Server::requester(void* arg)
 	requester_socket = *((SocketTCP*)arg);
 	requester_cond.signal();
 	requester_mutex.unlock();
-//TEST
-std::cout << "FIN TEST" << std::endl;
+
 	if(http_requester_reader_server.run(requester_socket)) {
 		http_requester_writer_server.run();//probable parametre
 	} else {

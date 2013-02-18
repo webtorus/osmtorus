@@ -4,3 +4,8 @@ HttpRequesterWriterClient::HttpRequesterWriterClient()
 {
 
 }
+
+bool HttpRequesterWriterClient::run(std::string url)
+{
+	return false;
+}
