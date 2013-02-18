@@ -45,6 +45,9 @@ void Server::run(int argc, char* argv[])
 			std::cerr << "Invalid Conf File" << std::endl;
 		}
 	}
+//TEST
+char c;
+std::cin >> c;
 
 	Thread::exit();
 }
