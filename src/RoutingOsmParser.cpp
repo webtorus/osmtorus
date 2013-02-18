@@ -123,16 +123,19 @@ void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 
 void RoutingOsmParser::finish()
 {
+	cout << nodes.size() << endl;
+	cout << relations.size() << endl;
+	cout << ways.size() << endl;
 	deleteUselessNodes();
 	linkBusStopsToBusNetwork();
 	linkStopsToNetwork();
 }
-/*
+
 void RoutingOsmParser::parseTag(const xmlChar** attrs)
 {
-	//OsmParser::parseTag(attrs);
+	OsmParser::parseTag(attrs);
 }
-*/
+
 void RoutingOsmParser::parseNode(const xmlChar** attrs)
 {
 	OsmParser::parseNode(attrs);
@@ -344,24 +347,19 @@ void RoutingOsmParser::deleteUselessNodes()
 
 double RoutingOsmParser::distanceFromLine(const ParsedNode* point, const ParsedNode* n1, const ParsedNode* n2, ParsedNode* result)
 {
-	//int test = 0;
 	double l2 = (n1->lat - n2->lat) * (n1->lat - n2->lat) + (n1->lon - n2->lon) * (n1->lon - n2->lon);
 	if (l2 == 0) {
-		//test = 1;
 		result->lat = n1->lat;
 		result->lon = n1->lon;
 	} else {
 		double t = ((point->lat - n1->lat) * (n2->lat - n1->lat) + (point->lon - n1->lon) * (n2->lon - n1->lon)) / l2;
 		if (t < 0) {
-			//test = 2;
 			result->lat = n1->lat;
 			result->lon = n1->lon;
 		} else if (t > 1) {
-			//test = 3;
 			result->lat = n2->lat;
 			result->lon = n2->lon;
 		} else {
-			//test = 4;
 			result->lat = n1->lat + t * (n2->lat - n1->lat);
 			result->lon = n1->lon + t * (n2->lon - n1->lon);
 		}
