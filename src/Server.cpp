@@ -2,7 +2,7 @@
 #include "include/ConfLoader.hpp"
 #include "include/HttpRequesterReaderServer.hpp"
 #include "include/HttpRequesterWriterServer.hpp"
-#include "include/OSMLoader.hpp"
+#include "include/OsmLoader.hpp"
 #include "include/SocketTCP.hpp"
 #include "include/Thread.hpp"
 #include <fstream>

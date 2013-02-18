@@ -3,7 +3,7 @@
 
 #include "Cond.hpp"
 #include "ConfLoader.hpp"
-#include "OSMLoader.hpp"
+#include "OsmLoader.hpp"
 #include "Mutex.hpp"
 #include <string>
 
