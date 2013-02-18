@@ -158,4 +158,4 @@ Mutex Server::requester_mutex;
 
 ConfLoader Server::_conf_loader;
 
-OSMLoader Server::_osm_loader;
+OsmLoader Server::_osm_loader;

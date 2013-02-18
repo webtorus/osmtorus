@@ -14,5 +14,7 @@
 
 bin/
 build/
+sample/
 *~
+*.out
 

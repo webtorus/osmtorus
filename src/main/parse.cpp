@@ -35,14 +35,15 @@ int main(int argc, char* argv[])
 	}
 
 	cout << "Création du graphe d'itinéraires" << endl;
-	RoutingGraph* g = parser.createRoutingGraph();
+	RoutingGraph g;
+	parser.createRoutingGraph(g);
 
-	cout << g->nodes.size() << endl;
-	cout << g->edges.size() << endl;
-	cout << g->transport_lines.size() << endl;
-	cout << g->ways.size() << endl;
+	cout << g.nodes.size() << endl;
+	cout << g.edges.size() << endl;
+	cout << g.transport_lines.size() << endl;
+	cout << g.ways.size() << endl;
 
-	RoutingStorage storage1(*g);
+	RoutingStorage storage1(g);
 
 	// 4 fichiers pour la sauvegarde
 	cout << "Enregistrement des données" << endl;
@@ -63,8 +64,6 @@ int main(int argc, char* argv[])
 	lines_file.close();
 	ways_file.close();
 	edges_file.close();
-
-	delete g;
 
 	/** TEST LECTURE FICHIERS **/
 	cout << "___________ TESTS ___________" << endl;
