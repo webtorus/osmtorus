@@ -17,7 +17,7 @@ class RoutingOsmParser: public virtual OsmParser
 		static short highwayType(const xmlChar* type);
 		static short relationRouteType(const xmlChar* type);
 
-		virtual RoutingGraph* createRoutingGraph();
+		virtual void createRoutingGraph(RoutingGraph& graph);
 
 	protected:
 		//virtual void parseTag(const xmlChar** attrs);

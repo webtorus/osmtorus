@@ -21,7 +21,7 @@ class Server
 		static Mutex listener_mutex;
 		static Mutex requester_mutex;
 		static ConfLoader _conf_loader;
-		static OSMLoader _osm_loader;
+		static OsmLoader _osm_loader;
 };
 
 #endif

@@ -33,14 +33,12 @@ RoutingOsmParser::~RoutingOsmParser()
 
 }
 
-RoutingGraph* RoutingOsmParser::createRoutingGraph()
+void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 {
-	RoutingGraph* g = new RoutingGraph();
-
-	g->boxes.min_x = boxes.min_x;
-	g->boxes.min_y = boxes.min_y;
-	g->boxes.max_x = boxes.max_x;
-	g->boxes.max_y = boxes.max_y;
+	graph.boxes.min_x = boxes.min_x;
+	graph.boxes.min_y = boxes.min_y;
+	graph.boxes.max_x = boxes.max_x;
+	graph.boxes.max_y = boxes.max_y;
 
 	// création des noeuds
 	map<long, ParsedNode*>::iterator it_n;
@@ -53,8 +51,8 @@ RoutingGraph* RoutingOsmParser::createRoutingGraph()
 		node->bus_stop = pn->bus_stop;
 		node->tram_stop = pn->tram_stop;
 
-		g->nodes[node->id] = node;
-		g->boxes.getBoxOf(node->lat, node->lon)->insert(node);
+		graph.nodes[node->id] = node;
+		graph.boxes.getBoxOf(node->lat, node->lon)->insert(node);
 	}
 
 	// création des arêtes
@@ -65,7 +63,7 @@ RoutingGraph* RoutingOsmParser::createRoutingGraph()
 		way->id = pw->id;
 		way->type = pw->type;
 		way->name = pw->name;
-		g->ways[way->id] = way;
+		graph.ways[way->id] = way;
 
 		vector<ParsedNode*>::iterator it_p;
 		for (it_p = pw->path.begin(); it_p + 1 != pw->path.end(); it_p++) {
@@ -74,8 +72,8 @@ RoutingGraph* RoutingOsmParser::createRoutingGraph()
 
 			unsigned int distance = distanceBetween(pn, pnn);
 
-			Node* node = g->nodes[pn->id];
-			Node* next_node = g->nodes[pnn->id];
+			Node* node = graph.nodes[pn->id];
+			Node* next_node = graph.nodes[pnn->id];
 			
 			node->ways[way->id] = way;
 			next_node->ways[way->id] = way;
@@ -86,7 +84,7 @@ RoutingGraph* RoutingOsmParser::createRoutingGraph()
 			e->way = way;
 			e->length = distance;
 			node->neighbors.insert(e);
-			g->edges.insert(e);
+			graph.edges.insert(e);
 
 			e = new Edge();
 			e->from = next_node;
@@ -94,7 +92,7 @@ RoutingGraph* RoutingOsmParser::createRoutingGraph()
 			e->way = way;
 			e->length = distance;
 			next_node->neighbors.insert(e);
-			g->edges.insert(e);
+			graph.edges.insert(e);
 		}
 	}
 
@@ -115,14 +113,12 @@ RoutingGraph* RoutingOsmParser::createRoutingGraph()
 		map<long, ParsedWay*>::iterator it_rw;
 		for (it_rw = pr->ways.begin(); it_rw != pr->ways.end(); it_rw++) {
 			ParsedWay* p_way = it_rw->second;
-			Way* way = g->ways[p_way->id];
+			Way* way = graph.ways[p_way->id];
 			way->transport_lines[line->id] = line;
 		}
 
-		g->transport_lines[line->id] = line;
+		graph.transport_lines[line->id] = line;
 	}
-
-	return g;
 }
 
 void RoutingOsmParser::finish()
