@@ -1,4 +1,5 @@
 #include "include/SocketTCP.hpp"
+#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -216,6 +217,11 @@ int SocketTCP::getSock() const
 struct sockaddr_in SocketTCP::getAddr() const
 {
 	return _addr;
+}
+
+std::string SocketTCP::getClientIp() const
+{
+	return std::string(inet_ntoa(_addr.sin_addr));
 }
 
 void SocketTCP::setSock(int sock)

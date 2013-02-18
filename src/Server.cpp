@@ -7,9 +7,9 @@
 #include "include/Thread.hpp"
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
-#include <vector>
 
 /*
  * to do
@@ -47,7 +47,7 @@ void Server::run(int argc, char* argv[])
 		}
 
 		if(conf_loader_return) {
-			std::vector<short int> ports = _conf_loader.getPorts();
+			std::set<short int> ports = _conf_loader.getPorts();
 
 			if(_conf_loader.getOsmFile() != "") {
 				bool osm_loader_return = false;
@@ -55,11 +55,11 @@ void Server::run(int argc, char* argv[])
 				osm_loader_return = _osm_loader.run(_conf_loader.getOsmFile());
 
 				if(osm_loader_return) {
-					for(unsigned int i = 0; i < ports.size(); i++) {
+					for(short int port: ports) {
 						Thread listener_thread;
 
 						listener_mutex.lock();
-						listener_thread.create(Server::listener, (void*)&(ports[i]));
+						listener_thread.create(Server::listener, (void*)&port);
 						listener_cond.wait(listener_mutex);
 						listener_mutex.unlock();
 					}
@@ -88,12 +88,27 @@ void* Server::listener(void* arg)
 	listener_socket.listening(10);
 
 	while(true) {
+		bool client_ip_authorized = false;
+		std::string client_ip;
+
 		requester_mutex.lock();
 		listener_socket.accepting(requester_socket);
 
-		//if() {si host client est dans _conf_loader.getAuthorizeds() ou que _conf_loader.allAuthorized() est égal à true
+		client_ip = requester_socket.getClientIp();
+
+		for(std::string next_ip: _conf_loader.getAuthorizeds()) {
+			if(next_ip == client_ip) {
+				client_ip_authorized = true;
+				break;
+			}
+		}
+
+		if(client_ip_authorized || _conf_loader.allAuthorized()) {
 			requester_thread.create(Server::requester, (void*)&requester_socket);
-		//}
+		}
+		
+		client_ip_authorized = false;
+
 		requester_cond.wait(requester_mutex);
 		requester_mutex.unlock();
 	}
@@ -114,8 +129,13 @@ void* Server::requester(void* arg)
 	requester_socket = *((SocketTCP*)arg);
 	requester_cond.signal();
 	requester_mutex.unlock();
-	http_requester_reader_server.run(requester_socket);
-	http_requester_writer_server.run();//probable parametre
+	if(http_requester_reader_server.run(requester_socket)) {
+		
+
+		http_requester_writer_server.run();//probable parametre
+	} else {
+		http_requester_writer_server.run();//probable parametre
+	}
 	requester_socket.closing();
 
 	Thread::exit();

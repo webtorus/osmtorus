@@ -1,9 +1,9 @@
 #include "include/ConfLoader.hpp"
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <string>
-#include <vector>
 
 ConfLoader::ConfLoader(): _all_authorized(false)
 {
@@ -36,7 +36,7 @@ bool ConfLoader::run(bool is_daemon)
 					line_split >> port;
 
 					if(!line_split.fail()) {
-						_ports.push_back(port);
+						_ports.insert(port);
 					} else {
 						return false;
 					}
@@ -50,7 +50,7 @@ bool ConfLoader::run(bool is_daemon)
 							_authorizeds.clear();
 							_all_authorized = true;
 						} else {
-							_authorizeds.push_back(authorized);
+							_authorizeds.insert(authorized);
 						}
 					} else {
 						return false;
@@ -80,12 +80,12 @@ bool ConfLoader::allAuthorized() const
 	return _all_authorized;
 }
 
-std::vector<short int> ConfLoader::getPorts() const
+std::set<short int> ConfLoader::getPorts() const
 {
 	return _ports;
 }
 
-std::vector<std::string> ConfLoader::getAuthorizeds() const
+std::set<std::string> ConfLoader::getAuthorizeds() const
 {
 	return _authorizeds;
 }

@@ -30,6 +30,7 @@ class SocketTCP
 		
 		int getSock() const;
 		struct sockaddr_in getAddr() const;
+		std::string getClientIp() const;
 
 		void setSock(int sock);
 
