@@ -103,5 +103,5 @@ bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 
 	_routing_type = type;
 
-	return false;
+	return true;
 }
