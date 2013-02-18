@@ -1,6 +1,7 @@
-#include <string>
 #include "include/HttpRequesterWriterServer.hpp"
 #include "include/SocketTCP.hpp"
+#include <iostream> 
+#include <string>
 
 using namespace std;
 

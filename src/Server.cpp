@@ -110,16 +110,19 @@ void* Server::requester(void* arg)
 	requester_mutex.unlock();
 
 	if(http_requester_reader_server.run(requester_socket)) {
-std::cout << "http_requester_reader_server.getLatSource()" << http_requester_reader_server.getLatSource() << std::endl;
-std::cout << "http_requester_reader_server.getLonSource()" << http_requester_reader_server.getLonSource() << std::endl;
-std::cout << "http_requester_reader_server.getLatTarget()" << http_requester_reader_server.getLatTarget() << std::endl;
-std::cout << "http_requester_reader_server.getLonTarget()" << http_requester_reader_server.getLonTarget() << std::endl;
-std::cout << "http_requester_reader_server.getRoutingType()" << http_requester_reader_server.getRoutingType() << std::endl;
-		//http_requester_writer_server.run();//probable parametre
+		std::ostringstream response;
+
+		response << http_requester_reader_server.getLatSource() << " ";
+		response << http_requester_reader_server.getLonSource() << " ";
+		response << http_requester_reader_server.getLatTarget() << " ";
+		response << http_requester_reader_server.getLonTarget() << " ";
+		response << http_requester_reader_server.getRoutingType();
+std::cout << response.str() << std::endl;
+		http_requester_writer_server.run(requester_socket, response.str());
 	} else {
-std::cout << "tu es un boulet" << std::endl;
-		//http_requester_writer_server.run();//probable parametre
+		http_requester_writer_server.run(requester_socket, "tu es un boulet");
 	}
+
 	requester_socket.closing();
 
 	Thread::exit();
