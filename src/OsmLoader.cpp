@@ -18,6 +18,8 @@ bool OsmLoader::run(string osm_filename)
 		return false;
 	}
 
+	osm_file.close();
+
 	// Si les fichiers torus existent, 
 	// pas besoin de parser le OSM 
 	if (_loadTorus(osm_filename)) {
