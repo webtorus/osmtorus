@@ -1,10 +1,10 @@
 #include "../include/Server.hpp"
 
-int main()
+int main(int argc, char* argv[])
 {
 	Server server;
 
-	server.run();
+	server.run(--argc, ++argv);
 
 	return 0;
 }

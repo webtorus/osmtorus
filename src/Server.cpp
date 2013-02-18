@@ -1,48 +1,76 @@
-#include "lib/include/SocketTCP.hpp"
-#include "lib/include/Thread.hpp"
 #include "include/Server.hpp"
+#include "include/ConfLoader.hpp"
+#include "include/HttpRequesterReaderServer.hpp"
+#include "include/HttpRequesterWriterServer.hpp"
+#include "include/OSMLoader.hpp"
+#include "include/SocketTCP.hpp"
+#include "include/Thread.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
-void Server::run()
+/*
+ * to do
+ *
+ * parser fichier conf en entier
+ * integrer le parser osm dans loadosm
+ * boundingbox sur les noeuds
+ * valider requete route
+ * algo trouver le noeud le plus proche d'une coordonnee
+ *  trouver la boundingbox correspondant a la coordonnee
+ *  selectionner tous les boundingbox susceptibles de contenir le noeud recherche
+ *  selectionner tous les noeuds des boundingsbox sélectionnees
+ *  comparaison distance entre les noeuds(naif, amelioration: possibilite de supprimer des noeuds sans calcul de la distance => plus rapide)
+ *  faire l'algo pour les coordonnees de depart et d'arrivee
+ * algo a star
+ *  selectionner noeud de depart
+ *  mettre les noeuds voisins du noeud depart dans une liste (1)
+ *  calcul pour chaque noeud le temps = temps_parent + distance(noeud, noeud_parent) / vitesse_typeroute
+ *  calcul pour chaque noeud le temps hypothetique pour arrive au noeud arrive = temps + distance(noeud, noeud_arrive) / vitesse_typeroute
+ *  selectionner noeud avec le plus faible temps hypothetique
+ *  si ce noeud etait deja dans la liste avant cette boucle et que temps_noeud_actuel < temps_noeud_ancien alors remplacer noeud et supprimer la liaison noeud_ancien parent_ancien
+ *  refaire l'algo a partir de (1)
+ * en dessous de la seconde pour traitement du requete route
+ **/
+
+void Server::run(int argc, char* argv[])
 {
-	Thread listener_thread;
-	std::ifstream conf_file("/etc/osmtorus/osmtorus.conf");
+	if(argc == 0 || (argc == 1 && std::string(argv[0]) == "-d")) {
+		bool conf_loader_return = false;
 
-	if(conf_file) {
-		std::string line;
-		
-		while(std::getline(conf_file, line)) {
-			std::istringstream line_split(line);
-			std::string tag;
-
-			if(line_split) {
-				line_split >> tag;
-
-				if(tag == "Listen") {
-					short int port = -1;
-
-					while(line_split) {
-						line_split >> port;
-
-						if(port != -1) {
-							listener_mutex.lock();
-							listener_thread.create(Server::listener, (void*)&port);
-							listener_cond.wait(listener_mutex);
-							listener_mutex.unlock();
-							port = -1;
-						}
-					}
-				} else if(tag == "Authorized") {
-
-				}
-			}
+		if(argc == 0) {
+			conf_loader_return = _conf_loader.run(false);
+		} else {
+			conf_loader_return = _conf_loader.run(true);
 		}
 
-		Thread::exit();
+		if(conf_loader_return) {
+			std::vector<short int> ports = _conf_loader.getPorts();
+
+			if(_conf_loader.getOsmFile() != "") {
+				bool osm_loader_return = false;
+
+				osm_loader_return = _osm_loader.run(_conf_loader.getOsmFile());
+
+				if(osm_loader_return) {
+					for(unsigned int i = 0; i < ports.size(); i++) {
+						Thread listener_thread;
+
+						listener_mutex.lock();
+						listener_thread.create(Server::listener, (void*)&(ports[i]));
+						listener_cond.wait(listener_mutex);
+						listener_mutex.unlock();
+					}
+				}
+			}
+		} else {
+			std::cerr << "Invalid Conf File" << std::endl;
+		}
 	}
+
+	Thread::exit();
 }
 
 void* Server::listener(void* arg)
@@ -62,7 +90,10 @@ void* Server::listener(void* arg)
 	while(true) {
 		requester_mutex.lock();
 		listener_socket.accepting(requester_socket);
-		requester_thread.create(Server::requester, (void*)&requester_socket);
+
+		//if() {si host client est dans _conf_loader.getAuthorizeds() ou que _conf_loader.allAuthorized() est égal à true
+			requester_thread.create(Server::requester, (void*)&requester_socket);
+		//}
 		requester_cond.wait(requester_mutex);
 		requester_mutex.unlock();
 	}
@@ -75,60 +106,21 @@ void* Server::listener(void* arg)
 
 void* Server::requester(void* arg)
 {
-	std::string request;
-	std::string response;
-	std::string cmd;
-	std::stringstream flow;
+	HttpRequesterReaderServer http_requester_reader_server;
+	HttpRequesterWriterServer http_requester_writer_server;
 	SocketTCP requester_socket;
 
 	requester_mutex.lock();
 	requester_socket = *((SocketTCP*)arg);
 	requester_cond.signal();
 	requester_mutex.unlock();
-	requester_socket.receive(request);
-//std::cout << request << std::endl;
-	flow << request;
-	flow >> cmd;
-
-	if(cmd == "loadosm") {
-		std::string osm;
-
-		osm.assign(flow.str(), flow.str().size() - (flow.rdbuf()->in_avail() - 1), flow.rdbuf()->in_avail() - 1);
-//std::cout << osm << std::endl;
-		response = loadosm(osm);
-		requester_socket.sending(response);
-	} else if(cmd == "route") {
-		std::string arg;
-
-		arg.assign(flow.str(), flow.str().size() - (flow.rdbuf()->in_avail() - 1), flow.rdbuf()->in_avail() - 1);
-		response = route(arg);
-		requester_socket.sending(response);
-	}
-
+	http_requester_reader_server.run(requester_socket);
+	http_requester_writer_server.run();//probable parametre
 	requester_socket.closing();
+
 	Thread::exit();
 
 	return EXIT_SUCCESS;
-}
-
-std::string Server::loadosm(std::string& osm)
-{
-	std::string return_info;
-
-	//to do
-	return_info = osm;
-
-	return return_info;
-}
-
-std::string Server::route(std::string& arg)
-{
-	std::string geojson;
-
-	//to do
-	geojson = arg;
-
-	return geojson;
 }
 
 Cond Server::listener_cond;
@@ -138,3 +130,7 @@ Cond Server::requester_cond;
 Mutex Server::listener_mutex;
 
 Mutex Server::requester_mutex;
+
+ConfLoader Server::_conf_loader;
+
+OSMLoader Server::_osm_loader;

@@ -1,19 +1,19 @@
-#include <iostream>
+#include "../include/Edge.hpp"
+#include "../include/Node.hpp"
+#include "../include/RoutingGraph.hpp"
+#include "../include/RoutingOsmParser.hpp"
+#include "../include/RoutingStorage.hpp"
+#include "../include/ParsedNode.hpp"
+#include "../include/ParsedRelation.hpp"
+#include "../include/ParsedWay.hpp"
+#include "../include/TransportLine.hpp"
+#include "../include/Way.hpp"
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <set>
-#include <stdlib.h>
-#include <time.h>      
-#include "../storage/RoutingStorage.hpp"
-#include "../parser/RoutingOsmParser.hpp"
-#include "../parser/ParsedNode.hpp"
-#include "../parser/ParsedWay.hpp"
-#include "../parser/ParsedRelation.hpp"
-#include "../structures/RoutingGraph.hpp"
-#include "../structures/Node.hpp"
-#include "../structures/TransportLine.hpp"
-#include "../structures/Way.hpp"
-#include "../structures/Edge.hpp"
 
 using namespace std;
 

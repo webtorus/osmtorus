@@ -1,24 +1,27 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "../lib/include/Cond.hpp"
-#include "../lib/include/Mutex.hpp"
+#include "Cond.hpp"
+#include "ConfLoader.hpp"
+#include "OSMLoader.hpp"
+#include "Mutex.hpp"
 #include <string>
 
 class Server
 {
 	public:
-		void run();
-		static void* listener(void* arg);
-		static void* requester(void* arg);
-		static std::string loadosm(std::string& osm);
-		static std::string route(std::string& arg);
+		void run(int argc, char* argv[]);
 
 	private:
+		static void* listener(void* arg);
+		static void* requester(void* arg);
+
 		static Cond listener_cond;
 		static Cond requester_cond;
 		static Mutex listener_mutex;
 		static Mutex requester_mutex;
+		static ConfLoader _conf_loader;
+		static OSMLoader _osm_loader;
 };
 
 #endif

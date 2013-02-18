@@ -22,7 +22,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="osmtorus, daemon software that returns a list of points representing the shortest path between 2 points"
 NAME=osmtorus
 DAEMON=/usr/sbin/$NAME
-DAEMON_ARGS="--options args"
+DAEMON_ARGS="-d"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
