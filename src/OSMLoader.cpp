@@ -24,6 +24,12 @@ bool OsmLoader::run(string osm_filename)
 		return true;
 	}
 
+	// Enregistre en torus les données du fichier OSM
+	return _saveTorus(osm_filename);
+}
+
+bool OsmLoader::_saveTorus(string osm_filename)
+{
 	RoutingOsmParser parser;
 	try {
 		parser.parseFile(osm_filename);
@@ -32,6 +38,20 @@ bool OsmLoader::run(string osm_filename)
 	}
 
 	parser.createRoutingGraph(_graph);
+
+	// Enregistrement des torus
+	string nodes_file_path = osm_filename + ".nodes.torus";
+	string lines_file_path = osm_filename + ".lines.torus";
+	string ways_file_path = osm_filename + ".ways.torus";
+	string edges_file_path = osm_filename + ".edges.torus";
+	
+	ofstream nodes_file(nodes_file_path.c_str(), ios::out | ios::binary);
+	ofstream lines_file(lines_file_path.c_str(), ios::out | ios::binary);
+	ofstream ways_file(ways_file_path.c_str(), ios::out | ios::binary);
+	ofstream edges_file(edges_file_path.c_str(), ios::out | ios::binary);
+
+	RoutingStorage storage(_graph);
+	storage.write(nodes_file, lines_file, ways_file, edges_file);
 
 	return true;
 }
@@ -64,7 +84,3 @@ RoutingGraph& OsmLoader::getRoutingGraph()
 	return _graph;
 }
 
-// OsmParser& OsmLoader::getOsmParser()
-// {
-// 	return _osm_parser;
-// }

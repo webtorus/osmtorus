@@ -11,12 +11,12 @@ class OsmLoader
 		OsmLoader();
 		bool run(std::string osm_filename);
 
-		// OsmParser& getOsmParser();
 		RoutingGraph& getRoutingGraph();
 
 	private:
 		bool _loadTorus(std::string osm_filename);
-		// OsmParser _osm_parser;
+		bool _saveTorus(std::string osm_filename);
+
 		RoutingGraph _graph;
 
 };
