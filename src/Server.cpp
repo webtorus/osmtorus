@@ -110,9 +110,15 @@ void* Server::requester(void* arg)
 	requester_mutex.unlock();
 
 	if(http_requester_reader_server.run(requester_socket)) {
-		http_requester_writer_server.run();//probable parametre
+std::cout << "http_requester_reader_server.getLatSource()" << http_requester_reader_server.getLatSource() << std::endl;
+std::cout << "http_requester_reader_server.getLonSource()" << http_requester_reader_server.getLonSource() << std::endl;
+std::cout << "http_requester_reader_server.getLatTarget()" << http_requester_reader_server.getLatTarget() << std::endl;
+std::cout << "http_requester_reader_server.getLonTarget()" << http_requester_reader_server.getLonTarget() << std::endl;
+std::cout << "http_requester_reader_server.getRoutingType()" << http_requester_reader_server.getRoutingType() << std::endl;
+		//http_requester_writer_server.run();//probable parametre
 	} else {
-		http_requester_writer_server.run();//probable parametre
+std::cout << "tu es un boulet" << std::endl;
+		//http_requester_writer_server.run();//probable parametre
 	}
 	requester_socket.closing();
 

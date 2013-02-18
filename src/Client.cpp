@@ -27,7 +27,6 @@ std::cout << http_requester_writer_client.getRequest() << std::endl;
 			request = http_requester_writer_client.getRequest();
 
 			for(unsigned int i = 0; i < request.size(); i++) {
-std::cout << request[i];
 				client_socket.sending(request[i]);
 			}
 			client_socket.sending('\0');
