@@ -47,8 +47,7 @@ bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 		request += c;
 		requester_socket.receive(&c);
 	}
-	
-	cout << request << endl;	
+
 	// request = route?source=_lat_,_lon_&target=_lat_,_lon&type=_t1_|_t2_
 
 	string request_type = request.substr(0, request.find_first_of('?') + 1);

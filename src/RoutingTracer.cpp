@@ -1,4 +1,11 @@
 #include "include/RoutingTracer.hpp"
+#include "include/Node.hpp"
+#include "include/OsmLoader.hpp"
+#include <cmath>
+#include <iostream>
+#include <limits>
+#include <set>
+#include <vector>
 
 /*
  * to do
@@ -22,4 +29,54 @@
 RoutingTracer::RoutingTracer()
 {
 
+}
+
+bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, short routing_type, OsmLoader& osm_loader)
+{
+	long started_id = 0;
+	long arrived_id = 0;
+	double shortest_distance = 0;
+	set<Node*> boundingbox_nodes;
+
+	_routing_nodes_ids.clear();
+
+	boundingbox_nodes.clear();
+	osm_loader.getRoutingGraph().boxes.getBoxesOf(lat1, lng1, 1, boundingbox_nodes);
+	if(boundingbox_nodes.size() == 0) {
+		return false;
+	}
+	shortest_distance = std::numeric_limits<int>::max();
+	for(Node* node: boundingbox_nodes) {
+		double local_distance = sqrt((node->lat - lat1) * (node->lat - lat1) + (node->lon - lng1) * (node->lon - lng1));
+
+		if(local_distance < shortest_distance) {
+			shortest_distance = local_distance;
+			started_id = node->id;
+		}
+	}
+
+	boundingbox_nodes.clear();
+	osm_loader.getRoutingGraph().boxes.getBoxesOf(lat2, lng2, 1, boundingbox_nodes);
+	if(boundingbox_nodes.size() == 0) {
+		return false;
+	}
+	shortest_distance = std::numeric_limits<int>::max();
+	for(Node* node: boundingbox_nodes) {
+		double local_distance = sqrt((node->lat - lat2) * (node->lat - lat2) + (node->lon - lng2) * (node->lon - lng2));
+
+		if(local_distance < shortest_distance) {
+			shortest_distance = local_distance;
+			arrived_id = node->id;
+		}
+	}
+
+	std::cout << "started_node: " << osm_loader.getRoutingGraph().nodes[started_id]->lat << " " << osm_loader.getRoutingGraph().nodes[started_id]->lon << std::endl;
+	std::cout << "arrived_node: " << osm_loader.getRoutingGraph().nodes[arrived_id]->lat << " " << osm_loader.getRoutingGraph().nodes[arrived_id]->lon << std::endl;
+
+	return false;
+}
+
+std::vector<long> RoutingTracer::getRoutingNodesIds() const
+{
+	return _routing_nodes_ids;
 }

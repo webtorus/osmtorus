@@ -2,7 +2,9 @@
 #include "include/ConfLoader.hpp"
 #include "include/HttpRequesterReaderServer.hpp"
 #include "include/HttpRequesterWriterServer.hpp"
+#include "include/JsonResponse.hpp"
 #include "include/OsmLoader.hpp"
+#include "include/RoutingTracer.hpp"
 #include "include/SocketTCP.hpp"
 #include "include/Thread.hpp"
 #include <fstream>
@@ -100,8 +102,14 @@ void* Server::listener(void* arg)
 
 void* Server::requester(void* arg)
 {
+	bool http_requester_reader_server_return = false;
+	bool json_response_return = false;
+	bool routing_tracer_return = false;
+	std::string response;
 	HttpRequesterReaderServer http_requester_reader_server;
 	HttpRequesterWriterServer http_requester_writer_server;
+	JsonResponse json_response;
+	RoutingTracer routing_tracer;
 	SocketTCP requester_socket;
 
 	requester_mutex.lock();
@@ -109,17 +117,36 @@ void* Server::requester(void* arg)
 	requester_cond.signal();
 	requester_mutex.unlock();
 
-	if(http_requester_reader_server.run(requester_socket)) {
-std::cout << "http_requester_reader_server.getLatSource()" << http_requester_reader_server.getLatSource() << std::endl;
-std::cout << "http_requester_reader_server.getLonSource()" << http_requester_reader_server.getLonSource() << std::endl;
-std::cout << "http_requester_reader_server.getLatTarget()" << http_requester_reader_server.getLatTarget() << std::endl;
-std::cout << "http_requester_reader_server.getLonTarget()" << http_requester_reader_server.getLonTarget() << std::endl;
-std::cout << "http_requester_reader_server.getRoutingType()" << http_requester_reader_server.getRoutingType() << std::endl;
-		//http_requester_writer_server.run();//probable parametre
-	} else {
-std::cout << "tu es un boulet" << std::endl;
-		//http_requester_writer_server.run();//probable parametre
+	http_requester_reader_server_return = http_requester_reader_server.run(requester_socket);
+
+	if(http_requester_reader_server_return) {
+		routing_tracer_return = routing_tracer.run(
+			http_requester_reader_server.getLatSource(),
+			http_requester_reader_server.getLonSource(),
+			http_requester_reader_server.getLatTarget(),
+			http_requester_reader_server.getLonTarget(),
+			http_requester_reader_server.getRoutingType(),
+			_osm_loader
+		);
 	}
+
+	if(routing_tracer_return) {
+		json_response_return = json_response.run(
+			http_requester_reader_server.getLatSource(),
+			http_requester_reader_server.getLonSource(),
+			http_requester_reader_server.getLatTarget(),
+			http_requester_reader_server.getLonTarget(),
+			routing_tracer.getRoutingNodesIds(),
+			_osm_loader
+		);
+	}
+
+	if(json_response_return) {
+		response = json_response.getResponse();
+	}
+
+	http_requester_writer_server.run(requester_socket, response);
+
 	requester_socket.closing();
 
 	Thread::exit();
