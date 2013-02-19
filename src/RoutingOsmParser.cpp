@@ -376,14 +376,14 @@ unsigned int RoutingOsmParser::distanceBetween(const ParsedNode* n1, const Parse
 	double earth_radius = 6372797.560856;
 
 	double latitude_arc  = (n1->lat - n2->lat) * rad;
-    double longitude_arc = (n1->lon - n2->lon) * rad;
-    double latitude_h = sin(latitude_arc * 0.5);
-    latitude_h *= latitude_h;
-    double lontitude_h = sin(longitude_arc * 0.5);
-    lontitude_h *= lontitude_h;
-    double tmp = cos(n1->lat * rad) * cos(n2->lat * rad);
+	double longitude_arc = (n1->lon - n2->lon) * rad;
+	double latitude_h = sin(latitude_arc * 0.5);
+	latitude_h *= latitude_h;
+	double lontitude_h = sin(longitude_arc * 0.5);
+	lontitude_h *= lontitude_h;
+	double tmp = cos(n1->lat * rad) * cos(n2->lat * rad);
 
-    return ceil(2.0 * asin(sqrt(latitude_h + tmp * lontitude_h)) * earth_radius);
+	return ceil(2.0 * asin(sqrt(latitude_h + tmp * lontitude_h)) * earth_radius);
 }
 
 void RoutingOsmParser::linkBusStop(ParsedNode* bus_stop, ParsedRelation* relation)
