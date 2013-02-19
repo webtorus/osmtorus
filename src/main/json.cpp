@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	}
 
 	JsonResponse response;
-	response.run(3.85, 43.5, 3.89, 43.17, nodes_ids, loader);
+	response.run(43.5, 3.7, 43.17, 3.89, nodes_ids, loader);
 
 	cout << response.getResponse() << endl;
 }
