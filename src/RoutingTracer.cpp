@@ -44,7 +44,7 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 	double smallest_time = 0.0;
 	std::set<RoutingTracerNode*> routing_tracer_nodes;
 	std::set<RoutingTracerNode*> routing_tracer_leaf_nodes;
-	RoutingGraph routing_graph = osm_loader.getRoutingGraph();
+	RoutingGraph& routing_graph = osm_loader.getRoutingGraph();
 	RoutingTracerNode* routing_tracer_selected_leaf_node = NULL;
 	RoutingTracerNode* routing_tracer_new_node = NULL;
 
@@ -62,15 +62,12 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		return false;
 	}
 
-	std::cout << "source_node: " << routing_graph.nodes[source_node_id]->lat << " " << routing_graph.nodes[source_node_id]->lon << std::endl;
-	std::cout << "target_node: " << routing_graph.nodes[target_node_id]->lat << " " << routing_graph.nodes[target_node_id]->lon << std::endl;
-
 	routing_tracer_selected_leaf_node = new RoutingTracerNode(source_node_id);
 	routing_tracer_selected_leaf_node->_target_node_time = distance(
 		routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lat,
 		routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lon,
 		routing_graph.nodes[target_node_id]->lat,
-		routing_graph.nodes[target_node_id]->lon) / speedWayType(FOOT_WAY);
+		routing_graph.nodes[target_node_id]->lon) / speedWayType(authorized_routing_type);
 	routing_tracer_nodes.insert(routing_tracer_selected_leaf_node);
 	routing_tracer_leaf_nodes.insert(routing_tracer_selected_leaf_node);
 
@@ -87,47 +84,56 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		routing_tracer_leaf_nodes.erase(routing_tracer_selected_leaf_node);
 
 		for(Edge* edge: routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->neighbors) {
-			bool is_leaf_node = false;
-			double source_node_time = routing_tracer_selected_leaf_node->_source_node_time
-				+ distance(
-					routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lat,
-					routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lon,
-					edge->to->lat,
-					edge->to->lon) / speedWayType(edge->way->type);
+			if((edge->way->type & authorized_routing_type) != 0) {
+				bool is_leaf_node = false;
+				double source_node_time = routing_tracer_selected_leaf_node->_source_node_time
+					+ distance(
+						routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lat,
+						routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lon,
+						edge->to->lat,
+						edge->to->lon) / speedWayType(edge->way->type & authorized_routing_type);
 
-			for(RoutingTracerNode* routing_tracer_node: routing_tracer_leaf_nodes) {
-				if(edge->to->id == routing_tracer_node->_id) {
-					is_leaf_node = true;
+				for(RoutingTracerNode* routing_tracer_node: routing_tracer_leaf_nodes) {
+					if(edge->to->id == routing_tracer_node->_id) {
+						is_leaf_node = true;
+					}
 				}
-			}
 
-			if(is_leaf_node) {
+				if(is_leaf_node) {
 
-			} else {
-				routing_tracer_new_node = new RoutingTracerNode(edge->to->id);
+				} else {
+					routing_tracer_new_node = new RoutingTracerNode(edge->to->id);
 
-				routing_tracer_new_node->_parent = routing_tracer_selected_leaf_node;
-				routing_tracer_new_node->_source_node_time = source_node_time;
-				routing_tracer_new_node->_target_node_time = distance(
-					routing_graph.nodes[edge->to->id]->lat,
-					routing_graph.nodes[edge->to->id]->lon,
-					routing_graph.nodes[target_node_id]->lat,
-					routing_graph.nodes[target_node_id]->lon) / speedWayType(edge->way->type);
-				routing_tracer_nodes.insert(routing_tracer_new_node);
-				routing_tracer_leaf_nodes.insert(routing_tracer_new_node);
-				routing_tracer_new_node->_parent->_children.push_back(routing_tracer_new_node);
+					routing_tracer_new_node->_parent = routing_tracer_selected_leaf_node;
+					routing_tracer_new_node->_source_node_time = source_node_time;
+					routing_tracer_new_node->_target_node_time = distance(
+						routing_graph.nodes[edge->to->id]->lat,
+						routing_graph.nodes[edge->to->id]->lon,
+						routing_graph.nodes[target_node_id]->lat,
+						routing_graph.nodes[target_node_id]->lon) / speedWayType(edge->way->type & authorized_routing_type);
+					routing_tracer_nodes.insert(routing_tracer_new_node);
+					routing_tracer_leaf_nodes.insert(routing_tracer_new_node);
+					routing_tracer_new_node->_parent->_children.push_back(routing_tracer_new_node);
 
-				if(routing_tracer_new_node->_id == target_node_id) {
-					routing_find = true;
+					if(routing_tracer_new_node->_id == target_node_id) {
+						routing_find = true;
+					}
 				}
 			}
 		}
 	}
 
 	if(routing_find) {
+		std::vector<long> routing_nodes_ids_tmp;
+
 		while(routing_tracer_new_node != NULL) {
-			_routing_nodes_ids.push_back(routing_tracer_new_node->_id);
+			routing_nodes_ids_tmp.push_back(routing_tracer_new_node->_id);
 			routing_tracer_new_node = routing_tracer_new_node->_parent;
+		}
+		
+		while(routing_nodes_ids_tmp.size() > 0) {
+			_routing_nodes_ids.push_back(routing_nodes_ids_tmp.back());
+			routing_nodes_ids_tmp.pop_back();
 		}
 	}
 
@@ -135,7 +141,7 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		delete routing_tracer_node;
 	}
 
-	return false;
+	return true;
 }
 
 bool RoutingTracer::obtainNearestNodeIdByLatLng(double lat, double lng, RoutingGraph& routing_graph, long& nearest_node_id)

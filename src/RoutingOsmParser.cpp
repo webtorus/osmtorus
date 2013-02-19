@@ -123,9 +123,6 @@ void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 
 void RoutingOsmParser::finish()
 {
-	cout << nodes.size() << endl;
-	cout << relations.size() << endl;
-	cout << ways.size() << endl;
 	deleteUselessNodes();
 	linkBusStopsToBusNetwork();
 	linkStopsToNetwork();
@@ -327,11 +324,8 @@ void RoutingOsmParser::validCurrentRelation()
 
 void RoutingOsmParser::deleteUselessNodes()
 {
-	// Suppression des nodes inutiles
 	map<long, ParsedNode*>::iterator it = nodes.begin();
 
-	cout << "Suppression de nodes inutiles :" << endl;
-	cout << "AVANT => " << nodes.size() << endl;
 	while (it != nodes.end()) {
 		ParsedNode* node = it->second;
 		if (NULL == node || (node->ways.empty() && node->relations.empty())) {
@@ -342,7 +336,6 @@ void RoutingOsmParser::deleteUselessNodes()
 			it++;
 		}
 	}
-	cout << "APRES => " << nodes.size() << endl;
 }
 
 double RoutingOsmParser::distanceFromLine(const ParsedNode* point, const ParsedNode* n1, const ParsedNode* n2, ParsedNode* result)
@@ -423,8 +416,6 @@ void RoutingOsmParser::linkBusStop(ParsedNode* bus_stop, ParsedRelation* relatio
 
 void RoutingOsmParser::linkBusStopsToBusNetwork()
 {
-	cout << "Liaison des stations de bus au réseau des bus" << endl;
-
 	map<long, ParsedRelation*>::iterator it_r;
 	for (it_r = relations.begin(); it_r != relations.end(); it_r++) {
 		ParsedRelation* relation = it_r->second;
@@ -469,8 +460,6 @@ void RoutingOsmParser::linkStop(ParsedNode* stop)
 
 void RoutingOsmParser::linkStopsToNetwork()
 {
-	cout << "Liaison des stations des transports en commun au réseau global" << endl;
-	cout << "AVANT : " << ways.size() << endl;
 	map<long, ParsedRelation*>::iterator it_r;
 	for (it_r = relations.begin(); it_r != relations.end(); it_r++) {
 		ParsedRelation* relation = it_r->second;
@@ -483,6 +472,4 @@ void RoutingOsmParser::linkStopsToNetwork()
 			}
 		}
 	}
-
-	cout << "APRES : " << ways.size() << endl;
 }
