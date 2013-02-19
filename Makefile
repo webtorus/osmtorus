@@ -1,5 +1,5 @@
 COMPILER_NAME                = g++
-COMPILER_FLAGS               = -W -Wall -Wno-unused-parameter -g -O2 -std=c++0x -I/usr/include/libxml2
+COMPILER_FLAGS               = -W -Wall -Wno-unused-parameter -g -O2 -std=c++11 -I/usr/include/libxml2
 LINKER_NAME                  = g++
 LINKER_FLAGS                 = -L/usr/lib -lxml2 -lpthread
 INCLUDES_DIRECTORY           = src/include
