@@ -1,4 +1,6 @@
 #include "include/RoutingTracer.hpp"
+#include "include/OsmLoader.hpp"
+#include <vector>
 
 /*
  * to do
@@ -22,4 +24,14 @@
 RoutingTracer::RoutingTracer()
 {
 
+}
+
+bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, short routing_type, OsmLoader& osm_loader)
+{
+	return false;
+}
+
+std::vector<long> RoutingTracer::getRoutingNodesIds() const
+{
+	return _routing_nodes_ids;
 }
