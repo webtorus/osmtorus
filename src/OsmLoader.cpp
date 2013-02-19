@@ -14,17 +14,18 @@ bool OsmLoader::run(string osm_filename)
 {
 	ifstream osm_file(osm_filename.c_str());
 
-	if (!osm_file.good()) {
-		return false;
-	}
-
-	osm_file.close();
-
 	// Si les fichiers torus existent, 
 	// pas besoin de parser le OSM 
 	if (_loadTorus(osm_filename)) {
 		return true;
 	}
+
+	// Si le fichier osm n'existe pas...
+	if (!osm_file.good()) {
+		return false;
+	}
+
+	osm_file.close();
 
 	// Enregistre en torus les données du fichier OSM
 	return _saveTorus(osm_filename);
