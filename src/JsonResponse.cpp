@@ -4,7 +4,6 @@
 #include "include/RoutingGraph.hpp"
 #include <string>
 #include <sstream>
-#include <vector>
 
 using namespace std;
 
@@ -13,10 +12,8 @@ JsonResponse::JsonResponse()
 
 }
 
-bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, vector<long> nodes_ids, OsmLoader& osm_loader)
+bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<Edge*> edges, OsmLoader& osm_loader)
 {
-	RoutingGraph& graph = osm_loader.getRoutingGraph();
-
 	ostringstream json;
 
 	json << "{";
@@ -56,8 +53,8 @@ bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, vecto
 	json << "\"type\":\"LineString\",";
 	json << "\"coordinates\":[";
 	json << "[" << lng1 << "," << lat1 << "],";
-	for (long id: nodes_ids) {
-		Node* node = graph.nodes[id];
+	for (Edge* e: edges) {
+		Node* node = e->from;
 		json << "[" << node->lon << "," << node->lat << "],";
 	}
 	json << "[" << lng2 << "," << lat2 << "]";

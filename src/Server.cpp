@@ -136,7 +136,7 @@ void* Server::requester(void* arg)
 			http_requester_reader_server.getLonSource(),
 			http_requester_reader_server.getLatTarget(),
 			http_requester_reader_server.getLonTarget(),
-			routing_tracer.getRoutingNodesIds(),
+			routing_tracer.getRoutingEdges(),
 			_osm_loader
 		);
 	}

@@ -1,18 +1,21 @@
 #ifndef ROUTING_TRACER_NODE_HPP
 #define ROUTING_TRACER_NODE_HPP
 
-#include <vector>
+#include "Node.hpp"
+#include "Edge.hpp"
 
 class RoutingTracerNode
 {
 	public:
-		RoutingTracerNode(long id);
+		RoutingTracerNode(Node* node);
+		RoutingTracerNode(Node* node, Edge* ingoing);
 
-		long _id;
-		double _source_node_time;
-		double _target_node_time;
-		RoutingTracerNode* _parent;
-		std::vector<RoutingTracerNode*> _children;
+		Node* node;
+		Edge* ingoing_edge;
+		double source_node_time;
+		double target_node_time;
+		RoutingTracerNode* parent;
+		// std::vector<RoutingTracerNode*> _children;
 };
 
 #endif
