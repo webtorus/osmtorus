@@ -33,7 +33,7 @@ std::cout << http_requester_reader_client.getResponse() << std::endl;
 
 	if(argc != 1 || !http_requester_writer_client_return) {
 		std::cerr << "Invalid Url" << std::endl;
-		std::cerr << "For Example: ./osmtorus_client \"http://localhost:7777/route?source=32.1,3.23&target=33.12,3.234&type=foot|cycle\"" << std::endl;
+		std::cerr << "For Example: bin/osmtorus_client \"http://localhost:7777/route?source=43.622252,3.858335&target=43.604878,3.880791&type=foot\"" << std::endl;
 	}
 }
 

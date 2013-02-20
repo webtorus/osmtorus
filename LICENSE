@@ -1,5 +1,5 @@
-osmtorus, daemon software that returns a list of points representing the shortest path between 2 points
-Copyright (C) 2013 robert
+osmtorus, daemon software that returns json representative a list of points of the shortest path between 2 points
+Copyright (C) 2013 maury robert
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
