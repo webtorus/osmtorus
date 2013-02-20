@@ -1,7 +1,7 @@
 #ifndef ROUTING_TRACER_HPP
 #define ROUTING_TRACER_HPP
 
-#include "OsmLoader.hpp"
+#include "RoutingGraph.hpp"
 #include <vector>
 #include <list>
 
@@ -9,8 +9,8 @@ class RoutingTracer
 {
 	public:
 		RoutingTracer();
-		bool run(double lat1, double lng1, double lat2, double lng2, short authorized_routing_type, OsmLoader& osm_loader);
-		Node* getClosestNodeByLatLng(double lat, double lng, RoutingGraph& routing_graph);
+		bool run(double lat1, double lng1, double lat2, double lng2, short authorized_routing_type, const RoutingGraph& routing_graph);
+		Node* getClosestNodeByLatLng(double lat, double lng, const RoutingGraph& routing_graph);
 		double distance(double lat1, double lng1, double lat2, double lng2);
 		double ffmod(double numerator, double denominator);
 		double speedWayType(short way_type);

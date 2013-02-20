@@ -1,6 +1,7 @@
 #include "../include/JsonResponse.hpp"
 #include "../include/OsmLoader.hpp"
 #include "../include/RoutingGraph.hpp"
+#include "../include/RoutingTracer.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -10,25 +11,21 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	// string osm_filename = "sample/map.osm";
+	if (argc != 5) {
+		cout << "bin/json 43.622252 3.858335 43.604878 3.880791" << endl;
+		return 0;
+	}
+	string osm_filename = "sample/map.osm";
 
-	// OsmLoader loader;
-	// cout << loader.run(osm_filename) << endl;
+	OsmLoader loader;
+	cout << loader.run(osm_filename) << endl;
 
-	// vector<long> nodes_ids;
+	RoutingTracer tracer;
+	tracer.run(atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]), 25, loader.getRoutingGraph());
 
-	// RoutingGraph& graph = loader.getRoutingGraph();
-	// int i = 0;
-	// for (auto node_entry: graph.nodes) {
-	// 	nodes_ids.push_back(node_entry.second->id);
-	// 	if (i > 10) {
-	// 		break;
-	// 	}
-	// 	i++;
-	// }
+	JsonResponse response;
+	response.run(atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]), tracer.getRoutingEdges(), loader.getRoutingGraph());
 
-	// JsonResponse response;
-	// response.run(43.5, 3.7, 43.17, 3.89, nodes_ids, loader);
-
-	// cout << response.getResponse() << endl;
+	cout << response.getResponse() << endl;
 }
+

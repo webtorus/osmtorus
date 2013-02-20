@@ -126,7 +126,7 @@ void* Server::requester(void* arg)
 			http_requester_reader_server.getLatTarget(),
 			http_requester_reader_server.getLonTarget(),
 			http_requester_reader_server.getRoutingType(),
-			_osm_loader
+			_osm_loader.getRoutingGraph()
 		);
 	}
 
@@ -137,7 +137,7 @@ void* Server::requester(void* arg)
 			http_requester_reader_server.getLatTarget(),
 			http_requester_reader_server.getLonTarget(),
 			routing_tracer.getRoutingEdges(),
-			_osm_loader
+			_osm_loader.getRoutingGraph()
 		);
 	}
 

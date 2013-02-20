@@ -1,8 +1,6 @@
 #include "include/RoutingTracer.hpp"
 #include "include/Edge.hpp"
 #include "include/Node.hpp"
-#include "include/OsmLoader.hpp"
-#include "include/RoutingGraph.hpp"
 #include "include/RoutingTracerNode.hpp"
 #include "include/WayType.hpp" 
 #include <cmath>
@@ -16,14 +14,13 @@ RoutingTracer::RoutingTracer()
 
 }
 
-bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, short authorized_routing_type, OsmLoader& osm_loader)
+bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, short authorized_routing_type, const RoutingGraph& routing_graph)
 {
 	bool routing_find = false;
 	double smallest_time = 0.0;
 	std::set<RoutingTracerNode*> routing_tracer_nodes;
 	std::set<RoutingTracerNode*> tracer_leaf_nodes;
 	
-	RoutingGraph& routing_graph = osm_loader.getRoutingGraph();
 	RoutingTracerNode* selected_leaf_node = NULL;
 	RoutingTracerNode* tracer_new_node = NULL;
 
@@ -114,7 +111,7 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 	return true;
 }
 
-Node* RoutingTracer::getClosestNodeByLatLng(double lat, double lng, RoutingGraph& routing_graph)
+Node* RoutingTracer::getClosestNodeByLatLng(double lat, double lng, const RoutingGraph& routing_graph)
 {
 	double local_distance = 0.0;
 	double shortest_distance = std::numeric_limits<double>::max();

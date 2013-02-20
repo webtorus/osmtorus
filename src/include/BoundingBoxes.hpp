@@ -28,6 +28,15 @@ class BoundingBoxes
 
 		}
 
+		const set<T>* get(unsigned int l, unsigned int c) const
+		{
+			if (l >= L || c >= C) {
+				return NULL;
+			}
+
+			return &content[l][c];
+		}
+
 		set<T>* get(unsigned int l, unsigned int c)
 		{
 			if (l >= L || c >= C) {
@@ -45,14 +54,14 @@ class BoundingBoxes
 			return get(l, c);
 		}
 
-		void getBoxesOf(const double x, const double y, unsigned int spread, set<T>& result)
+		void getBoxesOf(const double x, const double y, unsigned int spread, set<T>& result) const
 		{
 			int l = floor((double) L * (x - min_x) / (max_x - min_x));
 			int c = floor((double) C * (y - min_y) / (max_y - min_y));
 
 			for (unsigned int i = l - spread; i <= l + spread; i++) {
 				for (unsigned int j = c - spread; j <= c + spread; j++) {
-					set<T>* current = get(i, j);
+					const set<T>* current = get(i, j);
 					if (NULL != current) {
 						result.insert(current->begin(), current->end());
 					}

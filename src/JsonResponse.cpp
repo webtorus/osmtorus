@@ -1,7 +1,6 @@
 #include "include/JsonResponse.hpp"
-#include "include/OsmLoader.hpp"
+#include "include/Edge.hpp"
 #include "include/Node.hpp"
-#include "include/RoutingGraph.hpp"
 #include <string>
 #include <sstream>
 
@@ -12,7 +11,7 @@ JsonResponse::JsonResponse()
 
 }
 
-bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<Edge*> edges, OsmLoader& osm_loader)
+bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<Edge*> edges, const RoutingGraph& routing_graph)
 {
 	ostringstream json;
 
