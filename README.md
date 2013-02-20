@@ -47,7 +47,7 @@ make
 make install
 
 ###### step 05 : get file montpellier.osm
-
+With osmosis is a program to treat osm, you can cut an area notemment, http://wiki.openstreetmap.org/wiki/Osmosis 
 
 ###### step 06 : rename the file montpellier.osm in map.osm
 mv montpellier.osm map.osm
