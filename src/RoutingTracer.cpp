@@ -11,25 +11,6 @@
 #include <set>
 #include <vector>
 
-/*
- * to do
- * algo trouver le noeud le plus proche d'une coordonnee
- *  trouver la boundingbox correspondant a la coordonnee
- *  selectionner tous les boundingbox susceptibles de contenir le noeud recherche
- *  selectionner tous les noeuds des boundingsbox sélectionnees
- *  comparaison distance entre les noeuds(naif, amelioration: possibilite de supprimer des noeuds sans calcul de la distance => plus rapide)
- *  faire l'algo pour les coordonnees de depart et d'arrivee
- * algo a star
- *  selectionner noeud de depart
- *  mettre les noeuds voisins du noeud depart dans une liste (1)
- *  calcul pour chaque noeud le temps = temps_parent + distance(noeud, noeud_parent) / vitesse_typeroute
- *  calcul pour chaque noeud le temps hypothetique pour arrive au noeud arrive = temps + distance(noeud, noeud_arrive) / vitesse_typeroute
- *  selectionner noeud avec le plus faible temps hypothetique
- *  si ce noeud etait deja dans la liste avant cette boucle et que temps_noeud_actuel < temps_noeud_ancien alors remplacer noeud et supprimer la liaison noeud_ancien parent_ancien
- *  refaire l'algo a partir de (1)
- * en dessous de la seconde pour traitement du requete route
- **/
-
 RoutingTracer::RoutingTracer()
 {
 
@@ -85,7 +66,7 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 
 		for(Edge* edge: routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->neighbors) {
 			if((edge->way->type & authorized_routing_type) != 0) {
-				bool is_leaf_node = false;
+				bool is_placed_node = false;
 				double source_node_time = routing_tracer_selected_leaf_node->_source_node_time
 					+ distance(
 						routing_graph.nodes[routing_tracer_selected_leaf_node->_id]->lat,
@@ -93,13 +74,13 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 						edge->to->lat,
 						edge->to->lon) / speedWayType(edge->way->type & authorized_routing_type);
 
-				for(RoutingTracerNode* routing_tracer_node: routing_tracer_leaf_nodes) {
+				for(RoutingTracerNode* routing_tracer_node: routing_tracer_nodes) {
 					if(edge->to->id == routing_tracer_node->_id) {
-						is_leaf_node = true;
+						is_placed_node = true;
 					}
 				}
 
-				if(is_leaf_node) {
+				if(is_placed_node) {
 
 				} else {
 					routing_tracer_new_node = new RoutingTracerNode(edge->to->id);
