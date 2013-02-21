@@ -25,7 +25,18 @@
 	}).addTo(map);
 
 	$('#geojson').change(function() {
-		L.geoJson(JSON.parse($(this).val())).addTo(map);
+		L.geoJson(JSON.parse($(this).val()), { 
+			style: function(feature) {
+				console.log(feature.properties);
+				if (feature && feature.properties && feature.properties.color) {
+	 				return {
+						color: feature.properties.color,
+						weight: 6,
+						opacity: 0.8
+					}
+				}
+			}
+		}).addTo(map);
 	});
 	</script>
 </body>
