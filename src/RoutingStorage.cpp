@@ -49,6 +49,12 @@ void RoutingStorage::writeNodes(ostream& output)
 		write(output, node->id);
 		write(output, node->lat);
 		write(output, node->lon);
+		write(output, node->bus_stop);
+		write(output, node->tram_stop);
+
+		short size_name = node->name.size() + 1;
+		write(output, size_name);
+		output.write(node->name.c_str(), size_name);
 	}
 }
 
@@ -134,6 +140,16 @@ void RoutingStorage::readNodes(istream& input)
 		read(input, node->id);
 		read(input, node->lat);
 		read(input, node->lon);
+		read(input, node->bus_stop);
+		read(input, node->tram_stop);
+
+		short size_name;
+		read(input, size_name);
+		char name[size_name];
+		input.read(name, size_name);
+		node->name = name;
+
+
 		graph.nodes[node->id] = node;
 		graph.boxes.getBoxOf(node->lat, node->lon)->insert(node);
 

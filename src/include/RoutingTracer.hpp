@@ -15,11 +15,11 @@ class RoutingTracer
 		double ffmod(double numerator, double denominator);
 		double speedWayType(short way_type);
 
-		std::vector<long> getRoutingNodesIds() const;
+		// std::vector<long> getRoutingNodesIds() const;
 		std::list<Edge*> getRoutingEdges() const;
 
 	private:
-		std::vector<long> _routing_nodes_ids;
+		// std::vector<long> _routing_nodes_ids;
 		std::list<Edge*> _routing_edges;
 };
 

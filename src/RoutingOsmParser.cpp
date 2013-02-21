@@ -50,6 +50,7 @@ void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 		node->lon = pn->lon;
 		node->bus_stop = pn->bus_stop;
 		node->tram_stop = pn->tram_stop;
+		node->name = pn->name;
 
 		graph.nodes[node->id] = node;
 		graph.boxes.getBoxOf(node->lat, node->lon)->insert(node);

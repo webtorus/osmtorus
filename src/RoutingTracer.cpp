@@ -24,7 +24,8 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 	RoutingTracerNode* selected_leaf_node = NULL;
 	RoutingTracerNode* tracer_new_node = NULL;
 
-	_routing_nodes_ids.clear();
+	_routing_edges.clear();
+	// _routing_nodes_ids.clear();
 
 	Node* source_node = getClosestNodeByLatLng(lat1, lng1, routing_graph);
 
@@ -100,9 +101,12 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 	}
 
 	if (routing_find) {
+		RoutingTracerNode* to_delete;
 		while (tracer_new_node != NULL) {
 			_routing_edges.push_front(tracer_new_node->ingoing_edge);
+			to_delete = tracer_new_node;
 			tracer_new_node = tracer_new_node->parent;
+			delete to_delete;
 		}
 
 		_routing_edges.pop_front();
@@ -171,7 +175,7 @@ std::list<Edge*> RoutingTracer::getRoutingEdges() const
 	return _routing_edges;
 }
 
-std::vector<long> RoutingTracer::getRoutingNodesIds() const
-{
-	return _routing_nodes_ids;
-}
+// std::vector<long> RoutingTracer::getRoutingNodesIds() const
+// {
+// 	return _routing_nodes_ids;
+// }
