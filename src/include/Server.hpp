@@ -5,6 +5,8 @@
 #include "ConfLoader.hpp"
 #include "OsmLoader.hpp"
 #include "Mutex.hpp"
+#include "Thread.hpp"
+#include <vector>
 #include <string>
 
 class Server
@@ -22,6 +24,7 @@ class Server
 		static Mutex requester_mutex;
 		static ConfLoader _conf_loader;
 		static OsmLoader _osm_loader;
+		static std::vector<Thread> threads;
 };
 
 #endif

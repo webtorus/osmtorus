@@ -47,10 +47,12 @@ bool ConfLoader::run(bool is_daemon)
 
 					line_split >> authorized;
 
-					struct sockaddr_in addr;
-					addr.sin_family = AF_INET;
-					addr.sin_addr.s_addr = ((struct in_addr*)(gethostbyname(authorized.c_str())->h_addr))->s_addr;
-					authorized = inet_ntoa(addr.sin_addr);
+					if(authorized != "*") {
+						struct sockaddr_in addr;
+						addr.sin_family = AF_INET;
+						addr.sin_addr.s_addr = ((struct in_addr*)(gethostbyname(authorized.c_str())->h_addr))->s_addr;
+						authorized = inet_ntoa(addr.sin_addr);
+					}
 
 					if(!line_split.fail()) {
 						if(authorized == "*" || _all_authorized) {

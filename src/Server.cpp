@@ -9,6 +9,7 @@
 #include "include/Thread.hpp"
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <sstream>
 #include <string>
@@ -40,6 +41,7 @@ void Server::run(int argc, char* argv[])
 						listener_thread.create(Server::listener, (void*)&port);
 						listener_cond.wait(listener_mutex);
 						listener_mutex.unlock();
+						threads.push_back(listener_thread);
 					}
 				}
 			}
@@ -47,11 +49,10 @@ void Server::run(int argc, char* argv[])
 			std::cerr << "Invalid Conf File" << std::endl;
 		}
 	}
-//TEST
-char c;
-std::cin >> c;
-
-	Thread::exit();
+	
+	for(unsigned int i = 0; i < threads.size(); i++) {
+		threads[i].join();
+	}
 }
 
 void* Server::listener(void* arg)
@@ -165,3 +166,5 @@ Mutex Server::requester_mutex;
 ConfLoader Server::_conf_loader;
 
 OsmLoader Server::_osm_loader;
+
+std::vector<Thread> Server::threads;

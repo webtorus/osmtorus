@@ -122,12 +122,6 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 
 	_routing_edges.pop_front();
 
-for(Edge* edge: _routing_edges) {
-	std::cout << edge->from->id << " " << edge->from->name << " " << edge->from->bus_stop << edge->from->tram_stop << " "
-				<< edge->to->id << " " << edge->to->name << " " << edge->to->bus_stop << edge->to->tram_stop << " "
-				<< (edge->way->type & authorized_routing_type) << std::endl;
-}
-
 	return routing_find;
 }
 
