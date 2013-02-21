@@ -1,5 +1,7 @@
 #include <iostream>
 #include <map>
+#include <vector>
+#include <sstream>
 #include "include/HttpRequesterReaderServer.hpp"
 #include "include/SocketTCP.hpp"
 #include "include/Utils.hpp"
@@ -39,13 +41,66 @@ short HttpRequesterReaderServer::getRoutingType() const
 
 bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 {
+	bool is_end_request = false;
 	char c;
 	string request;
+	string attribute_header_request;
+	vector<string> header_request;
 	
-	requester_socket.receive(&c);
-	while (c != '\0') {
-		request += c;
+	while(!is_end_request) {
 		requester_socket.receive(&c);
+		if(c == '\r') {
+			header_request.push_back(attribute_header_request);
+			requester_socket.receive(&c);
+			if(c == '\r') {
+				is_end_request = true;
+			} else if(c == '\n') {
+				requester_socket.receive(&c);
+				if(c == '\r') {
+					requester_socket.receive(&c);
+					if(c == '\n') {
+						is_end_request = true;
+					} else {
+						return false;
+					}
+				} else {
+					attribute_header_request = c;
+				}
+			} else {
+				attribute_header_request = c;
+			}
+		} else if(c == '\n') {
+			header_request.push_back(attribute_header_request);			
+			if(c == '\n') {
+				is_end_request = true;
+			} else {
+				attribute_header_request = c;
+			}
+		} else {
+			attribute_header_request += c;
+		}
+	}
+
+	if(header_request.size() > 0) {
+		string cmd;
+		string protocol;
+		stringstream ss;
+
+		ss << header_request[0];
+		ss >> cmd;
+		ss >> request;
+		ss >> protocol;
+
+		if(!ss.fail()) {
+			if(cmd != "GET" || request.size() == 0 || request[0] != '/' || protocol != "HTTP/1.1") {
+				return false;
+			}
+			request.erase(request.begin());
+		} else {
+			return false;
+		}
+	} else {
+		return false;
 	}
 
 	// request = route?source=_lat_,_lon_&target=_lat_,_lon&type=_t1_|_t2_
@@ -53,7 +108,6 @@ bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 	string request_type = request.substr(0, request.find_first_of('?') + 1);
 
 	if (request_type != "route?") {
-		cout << "Request type = " << request_type << endl;
 		return false;
 	}
 
