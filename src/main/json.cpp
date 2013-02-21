@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	cout << loader.run(osm_filename) << endl;
 
 	RoutingTracer tracer;
-	tracer.run(atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]), 25, loader.getRoutingGraph());
+	tracer.run(atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]), 9, loader.getRoutingGraph());
 
 	JsonResponse response;
 	response.run(atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]), tracer.getRoutingEdges(), loader.getRoutingGraph());

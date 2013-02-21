@@ -3,6 +3,7 @@
 
 #include "RoutingGraph.hpp"
 #include "Edge.hpp"
+#include "EdgeGroup.hpp"
 #include <string>
 #include <list>
 
@@ -16,6 +17,10 @@ class JsonResponse
 
 	private:
 		std::string _response;
+
+		std::list<EdgeGroup> _getEdgeGroupList(const std::list<Edge*> edges) const;
+		map<long, TransportLine*> _commonTransportLines(std::map<long, TransportLine*> l1, std::map<long, TransportLine*> l2) const;
+		list<EdgeGroup> _mergeEdgeGroup(list<EdgeGroup> group_edge_list) const;
 };
 
 #endif
