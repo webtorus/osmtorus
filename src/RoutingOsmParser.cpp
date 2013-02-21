@@ -436,11 +436,13 @@ void RoutingOsmParser::linkStop(ParsedNode* stop)
 	set<ParsedNode*> box;
 	boxes.getBoxesOf(stop->lat, stop->lon, 1, box);
 
-	set<ParsedNode*>::iterator it;
-	for (it = box.begin(); it != box.end(); it++) {
-		ParsedNode* node = *it;
-
+	for (ParsedNode* node: box) {
 		if (stop->id == node->id) {
+			continue;
+		}
+
+		// Node déjà sur la ligne de transport
+		if (!node->relations.empty()) {
 			continue;
 		}
 

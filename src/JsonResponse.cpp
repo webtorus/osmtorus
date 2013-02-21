@@ -92,6 +92,39 @@ bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<
 		json << "},";
 	}
 
+	// Points représentant les stations importantes
+	for (EdgeGroup group_edge: group_edge_list) {
+		if (!group_edge.transport_lines.empty()) {
+			Node* first = group_edge.edges.front()->from;
+			Node* last = group_edge.edges.back()->to;
+			json << "{";
+			json << "\"type\":\"Feature\",";
+			json << "\"geometry\":{";
+			json << "\"type\":\"Point\",";
+			json << "\"coordinates\":";
+			json << "[" << first->lon << "," << first->lat << "]";
+			json << "},";
+			json << "\"properties\":{";
+			json << "\"type\":\"stop\",";
+			json << "\"name\":\"" << first->name << "\"";
+			json << "}";
+			json << "},";
+
+			json << "{";
+			json << "\"type\":\"Feature\",";
+			json << "\"geometry\":{";
+			json << "\"type\":\"Point\",";
+			json << "\"coordinates\":";
+			json << "[" << last->lon << "," << last->lat << "]";
+			json << "},";
+			json << "\"properties\":{";
+			json << "\"type\":\"stop\",";
+			json << "\"name\":\"" << last->name << "\"";
+			json << "}";
+			json << "},";
+		}
+	}
+
 	// Tracé entre dernière arête et dernier point réel
 	json << "{";
 	json << "\"type\":\"Feature\",";
@@ -103,6 +136,7 @@ bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<
 	json << "]";
 	json << "}";
 	json << "}";
+
 	json << "]";
 	json << "}";
 
@@ -132,24 +166,22 @@ list<EdgeGroup> JsonResponse::_mergeEdgeGroup(list<EdgeGroup> group_edge_list) c
 	map<long, TransportLine*> lines, current_lines;
 	EdgeGroup current;
 
-	list<EdgeGroup>::iterator it1, it2;
+	list<EdgeGroup>::iterator it;
 
-	it1 = group_edge_list.begin();
-	while (it1 != group_edge_list.end()) {
+	it = group_edge_list.begin();
+	while (it != group_edge_list.end()) {
 		current.edges.clear();
-		it2 = it1;
-		lines = it1->transport_lines;
+		lines = it->transport_lines;
 		do {
 			current_lines = lines;
-			current.edges.insert(current.edges.end(), it2->edges.begin(), it2->edges.end());
-			lines = _commonTransportLines(lines, it2->transport_lines);
-			it2++;
-		} while (it2 != group_edge_list.end() && !lines.empty());
+			current.edges.insert(current.edges.end(), it->edges.begin(), it->edges.end());
+			it++;
+			lines = _commonTransportLines(lines, it->transport_lines);
+		} while (it != group_edge_list.end() && !lines.empty());
 
 		current.transport_lines = current_lines;
-		result.push_back(current);
 
-		it1 = it2;
+		result.push_back(current);
 	}
 
 	return result;
@@ -160,21 +192,19 @@ list<EdgeGroup> JsonResponse::_getEdgeGroupList(list<Edge*> edges) const
 	list<EdgeGroup> result;
 
 	EdgeGroup group_edge;
-	list<Edge*>::iterator it1 = edges.begin();
-	list<Edge*>::iterator it2;
+	list<Edge*>::iterator it = edges.begin();
 
 	Edge* e1;
 	Edge* e2;
-	while (it1 != edges.end()) {
+	while (it != edges.end()) {
 		group_edge.edges.clear();
-		e1 = *it1;
+		e1 = *it;
 
 		if (e1->from->bus_stop || e1->from->tram_stop) {
-			it2 = it1;
-			while (it2 != edges.end()) {
-				e2 = *it2;
+			while (it != edges.end()) {
+				e2 = *it;
 				group_edge.edges.push_back(e2);
-				it2++;
+				it++;
 
 				if (e2->to->bus_stop || e2->to->tram_stop) {
 					break;
@@ -184,11 +214,10 @@ list<EdgeGroup> JsonResponse::_getEdgeGroupList(list<Edge*> edges) const
 			group_edge.transport_lines = _commonTransportLines(e1->way->transport_lines, e2->way->transport_lines);
 			result.push_back(group_edge);
 		} else {
-			it2 = it1;
-			while (it2 != edges.end()) {
-				e2 = *it2;
+			while (it != edges.end()) {
+				e2 = *it;
 				group_edge.edges.push_back(e2);
-				it2++;
+				it++;
 
 				if (e2->to->bus_stop || e2->to->tram_stop) {
 					break;
@@ -198,8 +227,6 @@ list<EdgeGroup> JsonResponse::_getEdgeGroupList(list<Edge*> edges) const
 			group_edge.transport_lines.clear();
 			result.push_back(group_edge);
 		}
-
-		it1 = it2;
 	}
 
 	return _mergeEdgeGroup(result);

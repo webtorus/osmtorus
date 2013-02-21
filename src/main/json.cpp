@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 	string osm_filename = "sample/map.osm";
 
 	OsmLoader loader;
-	cout << loader.run(osm_filename) << endl;
+	loader.run(osm_filename);
 
 	RoutingTracer tracer;
 	tracer.run(atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]), 9, loader.getRoutingGraph());
