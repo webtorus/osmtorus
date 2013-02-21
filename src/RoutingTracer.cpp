@@ -61,7 +61,19 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		tracer_leaf_nodes.erase(selected_leaf_node);
 
 		for (Edge* edge: selected_leaf_node->node->neighbors) {
-			if ((edge->way->type & authorized_routing_type) != 0) {
+			if ((edge->way->type & authorized_routing_type) != 0
+				&& ((selected_leaf_node->ingoing_edge == NULL) || (edge->way->type & TRAM_WAY & authorized_routing_type)
+					|| !(selected_leaf_node->ingoing_edge->way->type & TRAM_WAY & authorized_routing_type)
+					|| selected_leaf_node->node->tram_stop)
+				&& (!(edge->way->type & TRAM_WAY & authorized_routing_type)
+					|| ((selected_leaf_node->ingoing_edge != NULL) && (selected_leaf_node->ingoing_edge->way->type & TRAM_WAY & authorized_routing_type))
+					|| selected_leaf_node->node->tram_stop)
+				&& ((selected_leaf_node->ingoing_edge == NULL) || (edge->way->type & BUS_WAY & authorized_routing_type)
+					|| !(selected_leaf_node->ingoing_edge->way->type & BUS_WAY & authorized_routing_type)
+					|| selected_leaf_node->node->tram_stop)
+				&& (!(edge->way->type & BUS_WAY & authorized_routing_type)
+					|| ((selected_leaf_node->ingoing_edge != NULL) && (selected_leaf_node->ingoing_edge->way->type & BUS_WAY & authorized_routing_type))
+					|| selected_leaf_node->node->tram_stop)) {
 				bool is_placed_node = false;
 				double source_node_time = selected_leaf_node->source_node_time
 					+ distance(
@@ -100,19 +112,23 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		}
 	}
 
-	if (routing_find) {
-		RoutingTracerNode* to_delete;
-		while (tracer_new_node != NULL) {
-			_routing_edges.push_front(tracer_new_node->ingoing_edge);
-			to_delete = tracer_new_node;
-			tracer_new_node = tracer_new_node->parent;
-			delete to_delete;
-		}
-
-		_routing_edges.pop_front();
+	RoutingTracerNode* to_delete;
+	while (tracer_new_node != NULL) {
+		_routing_edges.push_front(tracer_new_node->ingoing_edge);
+		to_delete = tracer_new_node;
+		tracer_new_node = tracer_new_node->parent;
+		delete to_delete;
 	}
 
-	return true;
+	_routing_edges.pop_front();
+
+for(Edge* edge: _routing_edges) {
+	std::cout << edge->from->id << " " << edge->from->name << " " << edge->from->bus_stop << edge->from->tram_stop << " "
+				<< edge->to->id << " " << edge->to->name << " " << edge->to->bus_stop << edge->to->tram_stop << " "
+				<< (edge->way->type & authorized_routing_type) << std::endl;
+}
+
+	return routing_find;
 }
 
 Node* RoutingTracer::getClosestNodeByLatLng(double lat, double lng, const RoutingGraph& routing_graph)
