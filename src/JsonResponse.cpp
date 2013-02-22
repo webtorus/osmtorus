@@ -205,7 +205,8 @@ list<EdgeGroup> JsonResponse::_getEdgeGroupList(list<Edge*> edges) const
 		e1 = *it;
 
 		if (e1->from->bus_stop || e1->from->tram_stop) {
-			cout << "E1 WAY " << e1->way->id << endl;
+			cout << "WAYS" << endl;
+			cout << "E1 WAY " << e1->way->id << " " << e1->to->id << endl;
 			cout << "TYPE " << e1->way->type << endl;
 			for (auto tl: e1->way->transport_lines) {
 				cout << "Ligne " << tl.second->ref << endl;
@@ -217,7 +218,7 @@ list<EdgeGroup> JsonResponse::_getEdgeGroupList(list<Edge*> edges) const
 				it++;
 
 				if (e2->to->bus_stop || e2->to->tram_stop) {
-					cout << "E2 WAY " << e2->way->id << endl;
+					cout << "E2 WAY " << e2->way->id << " " << e2->from->id << "/" << e2->to->id << endl;
 					cout << "TYPE " << e2->way->type << endl;
 					for (auto tl: e2->way->transport_lines) {
 						cout << "Ligne " << tl.second->ref << endl;
@@ -246,7 +247,6 @@ list<EdgeGroup> JsonResponse::_getEdgeGroupList(list<Edge*> edges) const
 		}
 	}
 
-	return result;
 	return _mergeEdgeGroup(result);
 }
 

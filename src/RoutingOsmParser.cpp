@@ -440,6 +440,16 @@ void RoutingOsmParser::linkStop(ParsedNode* stop)
 			continue;
 		}
 
+		// Voie de la node déjà sur une ligne de transport
+		map<long, ParsedWay*>::iterator it = node->ways.begin();
+		while (it != node->ways.end() && it->second->relations.empty()) {
+			it++;
+		}
+
+		if(it != node->ways.end()) {
+			continue;
+		}
+
 		unsigned int distance = distanceBetween(stop, node);
 		if (distance < 50) {
 			ParsedWay* new_way = new ParsedWay();
