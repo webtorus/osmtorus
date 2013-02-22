@@ -104,6 +104,9 @@ bool HttpRequesterReaderServer::run(SocketTCP& requester_socket)
 	}
 
 	// request = route?source=_lat_,_lon_&target=_lat_,_lon&type=_t1_|_t2_
+	replaceAll(request, "%2C", ",");
+	replaceAll(request, "%7C", "|");
+	cout << "REQUEST = " << request << endl;
 
 	string request_type = request.substr(0, request.find_first_of('?') + 1);
 

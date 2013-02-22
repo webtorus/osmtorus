@@ -35,6 +35,12 @@
 						opacity: 0.8
 					}
 				}
+			},
+			onEachFeature: function(feature, layer) {
+				if (feature && feature.properties && feature.properties.name) {
+					popupContent = feature.properties.name;
+					layer.bindPopup(popupContent);
+				}
 			}
 		}).addTo(map);
 	});
