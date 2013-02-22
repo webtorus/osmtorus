@@ -41,9 +41,8 @@ void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 	graph.boxes.max_y = boxes.max_y;
 
 	// création des noeuds
-	map<long, ParsedNode*>::iterator it_n;
-	for (it_n = nodes.begin(); it_n != nodes.end(); it_n++) {
-		ParsedNode* pn = it_n->second;
+	for (auto tn: nodes) {
+		ParsedNode* pn = tn.second;
 		Node* node = new Node();
 		node->id = pn->id;
 		node->lat = pn->lat;
@@ -57,9 +56,8 @@ void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 	}
 
 	// création des arêtes
-	map<long, ParsedWay*>::iterator it_w;
-	for (it_w = ways.begin(); it_w != ways.end(); it_w++) {
-		ParsedWay* pw = it_w->second;
+	for (auto tw: ways) {
+		ParsedWay* pw = tw.second;
 		Way* way = new Way();
 		way->id = pw->id;
 		way->type = pw->type;
@@ -98,9 +96,8 @@ void RoutingOsmParser::createRoutingGraph(RoutingGraph& graph)
 	}
 
 	// ajout des informations de transports
-	map<long, ParsedRelation*>::iterator it_r;
-	for (it_r = relations.begin(); it_r != relations.end(); it_r++) {
-		ParsedRelation* pr = it_r->second;
+	for (auto tr: relations) {
+		ParsedRelation* pr = tr.second;
 		TransportLine *line = new TransportLine();
 		line->id = UniqueIdentifier::next();
 		line->ref =  pr->ref;
@@ -299,15 +296,13 @@ void RoutingOsmParser::validCurrentRelation()
 {
 	// Enregistrement des relations de type BUS ou TRAM
 	if (current_relation->type != OTHER) {
-		map<long, ParsedNode*>::iterator it_n;
-		for (it_n = current_relation->nodes.begin(); it_n != current_relation->nodes.end(); it_n++) {
-			ParsedNode* node = it_n->second;
+		for (auto tn: current_relation->nodes) {
+			ParsedNode* node = tn.second;
 			node->relations[current_relation->id] = current_relation;
 		}
 
-		map<long, ParsedWay*>::iterator it_w;
-		for (it_w = current_relation->ways.begin(); it_w != current_relation->ways.end(); it_w++) {
-			ParsedWay* way = it_w->second;
+		for (auto tw: current_relation->ways) {
+			ParsedWay* way = tw.second;
 			way->relations[current_relation->id] = current_relation;
 
 			if (current_relation->type == TRAM) {
@@ -388,9 +383,8 @@ void RoutingOsmParser::linkBusStop(ParsedNode* bus_stop, ParsedRelation* relatio
 	double min_distance = numeric_limits<double>::max();
 	double distance;
 
-	map<long, ParsedWay*>::iterator it_w;
-	for (it_w = relation->ways.begin(); it_w != relation->ways.end(); it_w++) {
-		ParsedWay* way = it_w->second;
+	for (auto tw: relation->ways) {
+		ParsedWay* way = tw.second;
 
 		for (unsigned int i = 0; i + 1 < way->path.size(); i++) {
 			ParsedNode* node = way->path[i];

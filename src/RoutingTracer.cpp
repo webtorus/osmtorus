@@ -48,6 +48,7 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 	routing_tracer_nodes.insert(selected_leaf_node);
 	tracer_leaf_nodes.insert(selected_leaf_node);
 
+/*
 	while (!routing_find && !tracer_leaf_nodes.empty()) {
 		smallest_time = std::numeric_limits<double>::max();
 
@@ -111,8 +112,59 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 			}
 		}
 	}
+/*/
+	while (!routing_find && !tracer_leaf_nodes.empty()) {
+		smallest_time = std::numeric_limits<double>::max();
 
+		for (RoutingTracerNode* tracer_leaf_node: tracer_leaf_nodes) {
+			if (tracer_leaf_node->source_node_time + tracer_leaf_node->target_node_time < smallest_time) {
+				smallest_time = tracer_leaf_node->source_node_time + tracer_leaf_node->target_node_time;
+				selected_leaf_node = tracer_leaf_node;
+			}
+		}
 
+		tracer_leaf_nodes.erase(selected_leaf_node);
+
+		for (Edge* edge: selected_leaf_node->node->neighbors) {
+			if ((edge->way->type & authorized_routing_type) != 0) {
+				bool is_placed_node = false;
+				double source_node_time = selected_leaf_node->source_node_time
+					+ distance(
+						selected_leaf_node->node->lat,
+						selected_leaf_node->node->lon,
+						edge->to->lat,
+						edge->to->lon) / speedWayType(edge->way->type & authorized_routing_type);
+
+				for (RoutingTracerNode* routing_tracer_node: routing_tracer_nodes) {
+					if(edge->to == routing_tracer_node->node) {
+						is_placed_node = true;
+					}
+				}
+
+				if (is_placed_node) {
+					// ?
+				} else {
+					tracer_new_node = new RoutingTracerNode(edge->to, edge);
+
+					tracer_new_node->parent = selected_leaf_node;
+					tracer_new_node->source_node_time = source_node_time;
+					tracer_new_node->target_node_time = distance(
+						edge->to->lat,
+						edge->to->lon,
+						target_node->lat,
+						target_node->lon) / speedWayType(edge->way->type & authorized_routing_type);
+					routing_tracer_nodes.insert(tracer_new_node);
+					tracer_leaf_nodes.insert(tracer_new_node);
+					// tracer_new_node->_parent->_children.push_back(tracer_new_node);
+
+					if(tracer_new_node->node == target_node) {
+						routing_find = true;
+					}
+				}
+			}
+		}
+	}
+//*/
 	RoutingTracerNode* to_delete;
 	while (tracer_new_node != NULL) {
 		_routing_edges.push_front(tracer_new_node->ingoing_edge);
