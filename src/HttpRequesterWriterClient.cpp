@@ -7,7 +7,7 @@ HttpRequesterWriterClient::HttpRequesterWriterClient()
 
 }
 
-bool HttpRequesterWriterClient::run(std::string url)
+bool HttpRequesterWriterClient::parse(std::string url)
 {
 	unsigned int i = 0;
 	std::string protocol;
@@ -64,8 +64,25 @@ bool HttpRequesterWriterClient::run(std::string url)
 		return false;
 	}
 
+	_request += '/';
+
 	for(++i; i < url.size(); i++) {
 		_request += url[i];
+	}
+
+	return true;
+}
+
+bool HttpRequesterWriterClient::run(SocketTCP& client_socket, std::string cmd)
+{
+	std::string request;
+
+	request += "GET ";
+	request += cmd;
+	request += "HTTP/1.1\r\n\r\n";
+
+	for(unsigned int i = 0; i < request.size(); i++) {
+		client_socket.sending(request[i]);
 	}
 
 	return true;

@@ -8,7 +8,8 @@ class HttpRequesterWriterClient
 {
 	public:
 		HttpRequesterWriterClient();
-		bool run(std::string url);
+		bool parse(std::string url);
+		bool run(SocketTCP& client_socket, std::string cmd);
 
 		short int getServerPort() const;
 		std::string getServerName() const;

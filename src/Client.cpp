@@ -15,7 +15,7 @@ void Client::run(int argc, char* argv[])
 		HttpRequesterWriterClient http_requester_writer_client;
 		SocketTCP client_socket;
 
-		http_requester_writer_client_return = http_requester_writer_client.run(std::string(argv[0]));
+		http_requester_writer_client_return = http_requester_writer_client.parse(std::string(argv[0]));
 
 		if(http_requester_writer_client_return) {
 			std::string request;
@@ -23,8 +23,7 @@ void Client::run(int argc, char* argv[])
 			client_socket.binding();
 			client_socket.connecting(http_requester_writer_client.getServerName().c_str(), http_requester_writer_client.getServerPort());
 
-			request = http_requester_writer_client.getRequest();
-			client_socket.sending(request);
+			http_requester_writer_client.run(client_socket, http_requester_writer_client.getRequest());
 			http_requester_reader_client.run(client_socket);
 std::cout << http_requester_reader_client.getResponse() << std::endl;
 			client_socket.closing();

@@ -117,9 +117,9 @@ void* Server::requester(void* arg)
 	requester_socket = *((SocketTCP*)arg);
 	requester_cond.signal();
 	requester_mutex.unlock();
-
+std::cout << "pipo" << std::endl;
 	http_requester_reader_server_return = http_requester_reader_server.run(requester_socket);
-
+std::cout << "pipo" << std::endl;
 	if(http_requester_reader_server_return) {
 		routing_tracer_return = routing_tracer.run(
 			http_requester_reader_server.getLatSource(),
@@ -130,7 +130,7 @@ void* Server::requester(void* arg)
 			_osm_loader.getRoutingGraph()
 		);
 	}
-
+std::cout << "pipo" << std::endl;
 	if(routing_tracer_return) {
 		json_response_return = json_response.run(
 			http_requester_reader_server.getLatSource(),
@@ -141,13 +141,13 @@ void* Server::requester(void* arg)
 			_osm_loader.getRoutingGraph()
 		);
 	}
-
+std::cout << "pipo" << std::endl;
 	if(json_response_return) {
 		response = json_response.getResponse();
 	}
-
+std::cout << "pipo" << std::endl;
 	http_requester_writer_server.run(requester_socket, response);
-
+std::cout << "pipo" << std::endl;
 	requester_socket.closing();
 
 	Thread::exit();
