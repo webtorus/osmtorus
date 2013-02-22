@@ -112,6 +112,7 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		}
 	}
 
+
 	RoutingTracerNode* to_delete;
 	while (tracer_new_node != NULL) {
 		_routing_edges.push_front(tracer_new_node->ingoing_edge);
@@ -120,7 +121,9 @@ bool RoutingTracer::run(double lat1, double lng1, double lat2, double lng2, shor
 		delete to_delete;
 	}
 
-	_routing_edges.pop_front();
+	if (!_routing_edges.empty()) {
+		_routing_edges.pop_front();
+	}
 
 	return routing_find;
 }

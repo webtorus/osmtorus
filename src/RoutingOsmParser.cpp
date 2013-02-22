@@ -173,9 +173,9 @@ short RoutingOsmParser::highwayType(const xmlChar* type)
 	if (xmlStrEqual(type, BAD_CAST "path")) {
 		return FOOT_WAY | CYCLE_WAY;
 	} else if (xmlStrEqual(type, BAD_CAST "pedestrian")) {
-		return FOOT_WAY;
+		return FOOT_WAY | CYCLE_WAY;
 	} else if (xmlStrEqual(type, BAD_CAST "footway")) {
-		return FOOT_WAY;
+		return FOOT_WAY | CYCLE_WAY;
 	} else if (xmlStrEqual(type, BAD_CAST "cycleway")) {
 		return CYCLE_WAY | FOOT_WAY;
 	} else if (xmlStrEqual(type, BAD_CAST "living_street")) {
@@ -447,7 +447,7 @@ void RoutingOsmParser::linkStop(ParsedNode* stop)
 		}
 
 		unsigned int distance = distanceBetween(stop, node);
-		if (distance < 25) {
+		if (distance < 50) {
 			ParsedWay* new_way = new ParsedWay();
 			new_way->id = UniqueIdentifier::next();
 			new_way->type = CYCLE_WAY | FOOT_WAY;

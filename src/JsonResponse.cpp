@@ -17,6 +17,10 @@ JsonResponse::JsonResponse()
 
 bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<Edge*> edges, const RoutingGraph& routing_graph)
 {
+	if (edges.empty()) {
+		return false;
+	}
+
 	ostringstream json;
 
 	json << "{";
