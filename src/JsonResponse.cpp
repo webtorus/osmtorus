@@ -144,11 +144,18 @@ bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<
 	json << "],";
 	json << "\"properties\":{";
 	json << "\"instructions\":[";
+
+	bool is_first = true; 
 	for (EdgeGroup group_edge: group_edge_list) {
 		if (!group_edge.transport_lines.empty()) {
 			Node* first = group_edge.edges.front()->from;
 			Node* last = group_edge.edges.back()->to;
-			json << "{";
+			if (is_first) {
+				json << "{";
+				is_first = false;
+			} else {
+				json << ",{";
+			}
 			json << "\"line\":\"" << group_edge.transport_lines.begin()->second->ref << "\",";
 			json << "\"type\":\"" << ((int) group_edge.transport_lines.begin()->second->type == (int) BUS_LINE ? "bus" : "tram") << "\",";
 			json << "\"source_stop\":\"" << first->name << "\",";
