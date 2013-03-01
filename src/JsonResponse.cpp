@@ -172,15 +172,13 @@ bool JsonResponse::run(double lat1, double lng1, double lat2, double lng2, list<
 	return true;
 }
 
-map<long, TransportLine*> JsonResponse::_commonTransportLines(map<long, TransportLine*> l1, map<long, TransportLine*> l2) const
+map<long, TransportLine*> JsonResponse::_commonTransportLines(const map<long, TransportLine*>& l1, const map<long, TransportLine*>& l2) const
 {
 	map<long, TransportLine*> result;
 
 	for (auto line_entry: l1) {
-		if (l2[line_entry.first] != NULL) {
+		if (l2.find(line_entry.first) != l2.end()) {
 			result[line_entry.first] = line_entry.second;
-		} else {
-			l2.erase(line_entry.first);
 		}
 	}
 
